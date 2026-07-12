@@ -55,5 +55,5 @@ strict = true
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
-module = ["cplex.*", "docplex.*", "gurobipy.*"]
+module = ["cplex.*", "docplex.*", "gurobipy.*", "scipy.*"]
 ignore_missing_imports = true

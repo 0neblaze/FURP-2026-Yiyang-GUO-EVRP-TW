@@ -35,6 +35,7 @@ class GeneticResult:
     customer_count: int
     seed: int
     population_size: int
+    configured_generations: int
     generations: int
     crossover_probability: float
     mutation_probability: float
@@ -42,6 +43,8 @@ class GeneticResult:
     score: float
     feasible: bool
     runtime_seconds: float
+    time_limit_seconds: float | None
+    terminated_by_time_limit: bool
     vehicle_count: int
     routes: tuple[tuple[str, ...], ...]
     violations: tuple[str, ...]
@@ -211,11 +214,14 @@ def solve_ga_vrptw(
     generations: int = 200,
     crossover_probability: float = 0.8,
     mutation_probability: float = 0.2,
+    time_limit_seconds: float | None = None,
 ) -> GeneticResult:
     if population_size < 2:
         raise ValueError("population_size must be at least 2")
     if generations < 0:
         raise ValueError("generations must be non-negative")
+    if time_limit_seconds is not None and time_limit_seconds <= 0:
+        raise ValueError("time_limit_seconds must be positive when provided")
 
     rng = random.Random(seed)
     customers = tuple(customer.name for customer in instance.customers)
@@ -229,7 +235,15 @@ def solve_ga_vrptw(
     evaluations = [_evaluate(instance, chromosome) for chromosome in population]
     convergence.append(_convergence_record(0, evaluations))
 
+    completed_generations = 0
+    terminated_by_time_limit = False
     for generation in range(1, generations + 1):
+        if (
+            time_limit_seconds is not None
+            and time.perf_counter() - started_at >= time_limit_seconds
+        ):
+            terminated_by_time_limit = True
+            break
         best = min(evaluations, key=lambda evaluation: evaluation.score)
         offspring: list[tuple[str, ...]] = [best.chromosome]
 
@@ -251,6 +265,7 @@ def solve_ga_vrptw(
         population = offspring
         evaluations = [_evaluate(instance, chromosome) for chromosome in population]
         convergence.append(_convergence_record(generation, evaluations))
+        completed_generations = generation
 
     best = min(evaluations, key=lambda evaluation: evaluation.score)
     runtime_seconds = time.perf_counter() - started_at
@@ -260,13 +275,16 @@ def solve_ga_vrptw(
         customer_count=len(instance.customers),
         seed=seed,
         population_size=population_size,
-        generations=generations,
+        configured_generations=generations,
+        generations=completed_generations,
         crossover_probability=crossover_probability,
         mutation_probability=mutation_probability,
         objective_value=best.objective,
         score=best.score,
         feasible=best.feasible,
         runtime_seconds=runtime_seconds,
+        time_limit_seconds=time_limit_seconds,
+        terminated_by_time_limit=terminated_by_time_limit,
         vehicle_count=len(best.routes),
         routes=best.routes,
         violations=best.violations,

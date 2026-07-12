@@ -60,6 +60,7 @@ def collect_environment() -> dict[str, Any]:
             "machine": platform.machine(),
             "processor": platform.processor(),
             "cpu_count": os.cpu_count(),
+            "gpu_used": False,
         },
         "tools": {
             "cmake": _command_version("cmake", "--version"),

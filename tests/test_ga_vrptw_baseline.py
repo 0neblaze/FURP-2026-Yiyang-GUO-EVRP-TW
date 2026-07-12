@@ -38,3 +38,14 @@ def test_ga_convergence_log_contains_required_fields() -> None:
     assert result.convergence[-1].best_objective > 0
     assert result.convergence[-1].average_objective > 0
     assert 0 <= result.convergence[-1].feasible_rate <= 1
+
+
+def test_ga_rejects_invalid_wall_clock_limit() -> None:
+    instance = generate_week02_instance(10, seed=2014)
+
+    try:
+        solve_ga_vrptw(instance, time_limit_seconds=0.0)
+    except ValueError as error:
+        assert "time_limit_seconds" in str(error)
+    else:
+        raise AssertionError("expected an invalid time limit to fail fast")

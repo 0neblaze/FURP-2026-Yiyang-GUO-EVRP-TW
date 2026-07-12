@@ -89,3 +89,36 @@ uv run evrptw-env --output results/runs/environment.json
 The report records the OS, architecture, CPU count, Python executable, package
 versions, compiler/build tools, and C++ extension. Generated files under
 `results/` are ignored by Git.
+
+## Week 5 advanced benchmark profile
+
+The verified Week 5 ALNS/BPC run used the following fixed profile:
+
+- macOS 27.0 on Apple Silicon (Apple M5), 10 logical CPUs, 16 GiB RAM;
+- CPython 3.13.13 and Apple clang 17.0.0;
+- SciPy 1.17.1 with HiGHS 1.14.0 for restricted-master LPs;
+- OR-Tools 9.15.6755, Gurobi 13.0.2, and CPLEX 22.2.0.0 installed;
+- one solver thread, no GPU, 30-second wall-clock limit per method/instance run;
+- seeds 2014, 2015, and 2016 for stochastic methods;
+- `PYTHONHASHSEED` left unset; algorithm randomness uses explicit local RNG objects.
+
+The exact captured values, including every dependency version and executable,
+are written to `results/week05_advanced/environment.json`. Reproduce the run with:
+
+```bash
+uv sync --all-groups
+uv run python -m evrptw.experiments.week05_advanced_benchmark \
+  --benchmark-dir data/schneider \
+  --output-dir results/week05_advanced \
+  --instances c101C5,r105C5,rc105C5,c104C10,r103C10,rc102C10,c106C15,r105C15,rc103C15,c101_21,r101_21,rc101_21 \
+  --stress-instances c101C5,r105C5,rc105C5 \
+  --seeds 2014,2015,2016 \
+  --alns-iterations 1000 \
+  --time-limit-seconds 30 \
+  --ga-population-size 60 \
+  --ga-generations 80
+```
+
+The current BPC implementation uses open-source HiGHS despite the installed
+commercial runtimes. This keeps the small exact reference reproducible without
+a commercial licence and does not change its enumerated-column optimality proof.

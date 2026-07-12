@@ -19,6 +19,7 @@ from evrptw.metrics import RouteMetrics, evaluate_route_metrics
 from evrptw.models import Instance
 from evrptw.repairs import (
     ChargingRepairResult,
+    RouteSplitRepairResult,
     insert_anticipatory_charging_stations,
     insert_charging_stations,
 )
@@ -267,7 +268,7 @@ def _record_repair_result(
     seed: int,
     battery_capacity: float,
     method: str,
-    repair: ChargingRepairResult,
+    repair: ChargingRepairResult | RouteSplitRepairResult,
     constructor_runtime_seconds: float,
     raw_dir: Path,
     payload: dict[str, Any],
@@ -371,7 +372,15 @@ def _summary_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return summaries
 
 
-def _write_failure_cases(path: Path, rows: list[dict[str, Any]]) -> None:
+def _write_failure_cases(
+    path: Path,
+    rows: list[dict[str, Any]],
+    *,
+    week_label: str = "Week 4",
+    introduction: str = (
+        "Failure cases show where the battery-capacity sweep and repair methods still fail."
+    ),
+) -> None:
     failures = [
         row
         for row in rows
@@ -387,9 +396,9 @@ def _write_failure_cases(path: Path, rows: list[dict[str, Any]]) -> None:
     )
 
     lines = [
-        "# Week 4 Failure Cases",
+        f"# {week_label} Failure Cases",
         "",
-        "Failure cases show where the battery-capacity sweep and repair methods still fail.",
+        introduction,
         "",
         "| Battery | Instance | Size | Method | Seed | Objective | Violated constraints | "
         "First infeasible step | Diagnosis | Possible fix |",
@@ -438,6 +447,11 @@ def _violated_constraint_summary(row: dict[str, Any]) -> str:
 
 def _diagnosis(row: dict[str, Any]) -> str:
     method = str(row["method"])
+    if int(row["energy_violations"]) and method.endswith("ANTICIPATORY_SPLIT_REPAIR"):
+        return (
+            "charging and route splitting reduced violations but did not recover full energy "
+            "feasibility"
+        )
     if int(row["energy_violations"]) and method.endswith("ANTICIPATORY_REPAIR"):
         return "even early station insertion could not keep every route energy-feasible"
     if int(row["energy_violations"]):
@@ -453,6 +467,8 @@ def _diagnosis(row: dict[str, Any]) -> str:
 
 def _possible_fix(row: dict[str, Any]) -> str:
     method = str(row["method"])
+    if int(row["energy_violations"]) and method.endswith("ANTICIPATORY_SPLIT_REPAIR"):
+        return "use energy-aware route construction or revise the charging model"
     if int(row["energy_violations"]) and method.endswith("ANTICIPATORY_REPAIR"):
         return "split the route or make energy state part of construction"
     if int(row["energy_violations"]):

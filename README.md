@@ -48,6 +48,79 @@ This is your project home for the FURP programme. **Fork this template**, rename
 
 ---
 
+### Week 5 low-battery experiments
+
+Run the Week 5 low-battery consolidation experiment with:
+
+```bash
+uv run python -m evrptw.experiments.week05_consolidation \
+  --output-dir results/week05 \
+  --summary-dir experiments/summaries
+```
+
+It reruns the Week 4 `60`-unit battery cases, checks their deterministic
+metrics against the tracked Week 4 per-run table, and compares baseline routes,
+late charging repair, anticipatory charging repair, and anticipatory repair
+plus route splitting. It is retained as the original low-battery structural
+infeasibility control.
+
+Run the infrastructure-augmentation experiment with:
+
+```bash
+uv run python -m evrptw.experiments.week05_infrastructure_augmentation \
+  --output-dir results/week05_infrastructure \
+  --summary-dir experiments/summaries
+```
+
+It preserves the customers, seeds, battery capacity, and vehicle parameters,
+then adds deterministic midpoint charging stations only for customers that
+cannot complete a safe-node-to-customer-to-safe-node energy cycle. Raw artifacts
+are Git-ignored; the reviewable summaries and documentation are:
+
+- [Week 5 checkpoint](docs/week05_project_checkpoint.md)
+- [Week 5 technical report](docs/week05_consolidation_and_route_splitting.md)
+- [Week 5 progress log](docs/05_weekly.md)
+- [Week 5 summary results](experiments/summaries/week05_summary_results.csv)
+- [Week 5 infrastructure summary](experiments/summaries/week05_infrastructure_summary_results.csv)
+
+### Week 5 advanced method benchmark
+
+The current primary method is an ALNS-based matheuristic with an exact
+full-recharge charging subproblem. A small-scale Branch-Price-and-Cut solver
+with bidirectional labeling provides proven-optimal references for instances
+with at most eight customers. OR-Tools remains a transparent classical VRPTW
+baseline, and the GA is retained only as a weak baseline.
+
+The Schneider benchmark files are local, Git-ignored research data under
+`data/schneider/`. Run the reproducible Primary and battery Stress benchmarks
+with:
+
+```bash
+uv sync --all-groups
+uv run python -m evrptw.experiments.week05_advanced_benchmark \
+  --benchmark-dir data/schneider \
+  --output-dir results/week05_advanced \
+  --instances c101C5,r105C5,rc105C5,c104C10,r103C10,rc102C10,c106C15,r105C15,rc103C15,c101_21,r101_21,rc101_21 \
+  --stress-instances c101C5,r105C5,rc105C5 \
+  --seeds 2014,2015,2016 \
+  --alns-iterations 1000 \
+  --time-limit-seconds 30 \
+  --ga-population-size 60 \
+  --ga-generations 80
+```
+
+The full methodology, limitations, Week 5 second-edition report, and reviewable
+results are:
+
+- [ALNS, exact charging, and BPC methodology](docs/week05_alns_bpc_methodology.md)
+- [Week 5 second-edition report](docs/05_weekly_v2_alns_bpc_benchmark_rebuild.md)
+- [Schneider 92-instance audit](experiments/summaries/schneider_instance_catalog.csv)
+- [Advanced per-run results](experiments/summaries/week05_advanced_per_run_results.csv)
+- [Advanced summary results](experiments/summaries/week05_advanced_summary_results.csv)
+- [Advanced failure records](experiments/summaries/week05_advanced_failure_cases.csv)
+
+---
+
 ## Repository structure
 
 This structure is **mandatory** — please keep it intact.
