@@ -119,6 +119,26 @@ results are:
 - [Advanced summary results](experiments/summaries/week05_advanced_summary_results.csv)
 - [Advanced failure records](experiments/summaries/week05_advanced_failure_cases.csv)
 
+### Stage 0 frozen ALNS baseline
+
+Stage 0 freezes the current `ALNS_EXACT_CHARGING` method on 12 representative
+Schneider instances, seeds `2014/2015/2016`, a 30-second limit, and one thread.
+The workflow records validated solution metrics, exact-charging activity,
+structured constraint violations, source and instance hashes, environment
+metadata, immutable checksums, and an automatic regression comparison report.
+
+```bash
+uv run python -m evrptw.experiments.stage00_baseline run \
+  --config configs/stage00_baseline.toml \
+  --output-dir results/stage00 \
+  --baseline-dir experiments/baselines/stage00
+```
+
+Full raw logs remain under the ignored `results/` directory. The curated,
+checksum-protected baseline is tracked under `experiments/baselines/stage00/`.
+See [the Stage 0 baseline protocol](docs/stage00_baseline.md) for verification
+and candidate-comparison commands.
+
 ---
 
 ## Repository structure
