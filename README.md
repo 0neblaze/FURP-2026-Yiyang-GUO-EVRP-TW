@@ -48,6 +48,22 @@ This is your project home for the FURP programme. **Fork this template**, rename
 
 ---
 
+### Week 6 method integration
+
+Week 6 consolidates the existing ALNS, exact-charging, small-scale
+Branch-Price-and-Cut, baseline, and validation components into one reviewable
+workflow. The integration note uses only Week 5 and earlier evidence: 120
+experiment records across 15 Primary/Stress scenarios, four customer scales,
+and three random seeds.
+
+- [Week 6 integration note](docs/06_weekly.md)
+- [Week 5 methodology](docs/week05_alns_bpc_methodology.md)
+- [Week 5 per-run evidence](experiments/summaries/week05_advanced_per_run_results.csv)
+- [Week 5 summary evidence](experiments/summaries/week05_advanced_summary_results.csv)
+- [Week 5 failure evidence](experiments/summaries/week05_advanced_failure_cases.csv)
+
+---
+
 ### Week 5 low-battery experiments
 
 Run the Week 5 low-battery consolidation experiment with:
