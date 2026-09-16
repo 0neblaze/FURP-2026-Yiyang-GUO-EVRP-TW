@@ -283,18 +283,39 @@ There is also harmless noise: SQLite temp files locked during teardown (WinError
 
 ## 9. Risks, Open Items, and Worktree Anomalies
 
-### 9.1 Uncommitted Worktree State (Attention Required)
+### 9.1 Documentation Cleanup (Resolved)
 
-`git status` shows:
+Sixteen per-stage protocol documents had been deleted from the worktree but left
+unstaged. The deletion was confirmed as deliberate and is now committed:
+`docs/stage00_baseline.md`, `stage01_lexicographic_objective.md`,
+`stage02_{route_reduction,route_quality,constraint_guided,constraint_guided_review}.md`,
+`stage03_{measurement,artifact_registry}.md`, `stage031/032/033/034_*.md`,
+`stage051_best_known.md`, `stage052_{change_log,performance_benchmark_workflow}.md`,
+and `cpu_batch_pilot.md`. The policies they carried survive in `ROADMAP.md` (the
+full Stage 0–8 protocols) and `AGENTS.md` (the per-stage acceptance policies);
+every surviving cross-reference has been remapped to those two documents. The
+removed files remain recoverable from git history at `1ffdce6`.
 
-- **16 tracked documents deleted in the worktree (not staged)**: `docs/stage00_baseline.md`, `stage01_lexicographic_objective.md`, `stage02_{route_reduction,route_quality,constraint_guided,constraint_guided_review}.md`, `stage03_{measurement,artifact_registry}.md`, `stage031/032/033/034_*.md`, `stage051_best_known.md`, `stage052_{change_log,performance_benchmark_workflow}.md`, and `cpu_batch_pilot.md`. All are fully preserved in git HEAD (several citations in this report were taken from HEAD). If the deletion was unintentional, run `git restore docs/`. The 17th previously deleted file — the root Chinese-named staged-improvement roadmap — was translated to English and committed as `ROADMAP.md`.
-- **Untracked new directories**: `.workbuddy/` (AI workspace) only; the publication-landscape survey is tracked under `docs/research/`, and the poster v2 engineering is tracked under `poster/`.
-- In the README quick checklist, "share with the research group / public repository" and "first meeting_notes file" remain unchecked.
+Two consequences worth recording:
+
+- No code or test referenced the removed documents. `_CAMPAIGN_SUCCESSOR_ALLOWED_PATHS`
+  in `stage052_campaign_runner.py` still lists the two Stage 5.2 documentation
+  paths; those entries are inert (a static allowlist compared against `git diff`
+  output, with no existence assertion, and the successor-revision tests pass), but
+  the sanctioned documentation surface for a future Stage 5.2 successor revision
+  is now `AGENTS.md`.
+- The README quick checklist is fully ticked. Note that `docs/meeting_notes/` still
+  contains only `.gitkeep` and `TEMPLATE.md`, so the "first meeting note" item has
+  no tracked file behind it yet.
+
+Remaining worktree state:
+
+- **Untracked**: `.workbuddy/` (AI workspace) only; the publication-landscape survey is tracked under `docs/research/`, and the poster v2 engineering is tracked under `poster/`.
 
 ### 9.2 Project-Level Open Items
 
 1. **Stage 5.2 G Formal incomplete**: the Pilot (attempt21) passed, but the 2,040-run budget experiment has not produced results; the two engineering root causes behind attempt22/25 are fixed, and policy requires retrying from a new G Pilot label (A–F not rerun).
-2. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.2, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `report.md`, `ROADMAP.md`).
+2. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.2, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `report.md`, `ROADMAP.md`). The *Project Info* table now also names the supervising faculty (Dr. Tianxing Cui) and the project lead (Fuhua JIA, 20618753, Department of Mechanical, Materials and Manufacturing Engineering — verified against the UNNC research portal and ORCID record), and the quick checklist is fully ticked.
 3. **BKS incompatibility is an honest boundary**: the objective function and distance metric differ from the published BKS, so no gap comparison was made — publications must phrase improvements as "relative improvement within the self-consistent baseline".
 4. Poster and weekly-report figures were verified consistent (87→76/−12.6%, −5.1%, 36/36, −22.0% c101_21 median).
 
@@ -313,8 +334,8 @@ Starting from the FURP research requirement of "replicate SSG (2014) E-VRPTW + �
 1. **Academic results**: the ALNS + exact-charging-subproblem combination under a lexicographic vehicle-first objective achieved audited improvements of −12.64% vehicles and −5.10% distance within the frozen 12×3 protocol; the BPC exact comparison anchors small-scale optimality; cpu_batch and the native kernel deliver family-median speed-ups of up to 24.4%; Stage 4 adaptive weights passed the six-gate review with 7 winning pairs.
 2. **Methodological value**: independent review CLIs, hash chains, dual reruns, failure retention, the canonical artifact registry, the retention archive, resource guards, and transient-service reviews — together forming a traceable chain from raw evidence to readiness status, such that any claim can be replayed and re-verified by a third party.
 3. **Honest boundaries**: BKS-incompatible gaps are not computed, no near-optimality is claimed for 100-customer instances, timeout overruns are explicitly recorded, and failed attempts are all retained — there are no whitewashed negative results.
-4. **Open items**: the Stage 5.2 G Formal benchmark (external archive volume ready, root causes fixed), the README stage-narrative update, and restoration or deliberate-cleanup confirmation for the 17 deleted worktree documents.
+4. **Open items**: the Stage 5.2 G Formal benchmark (external archive volume ready, root causes fixed), and a first tracked file under `docs/meeting_notes/` — the checklist box is ticked by owner decision, but the directory still holds only the template.
 
 ---
 
-*This report is based on HEAD (b4ac986) and direct worktree measurements; all cited file paths are relative to the repository root.*
+*This report is based on direct worktree measurements at HEAD `1ffdce6` plus the documentation-cleanup commit that follows it (§9.1); all cited file paths are relative to the repository root.*

@@ -204,7 +204,8 @@ the registry. Logical mapping does not imply copying or moving.
   atomically by run label; overwriting historical rows is forbidden.
 - The lightweight `stage05.2_retention_registry.csv` records only archive aliases
   and relative paths, never machine-local absolute paths. Detailed implementation
-  changes append to `docs/stage052_change_log.md`.
+  changes are recorded through the retention registry and, for governance
+  changes, in `AGENTS.md`.
 - prerequisite/review calls `resolve_retained_run` with the run label; the registry
   and the local storage-root locator resolve the archive alias, re-verifying file
   counts, byte counts, and tree SHA-256 before returning to existing

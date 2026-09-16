@@ -31,8 +31,8 @@ This is your project home for the FURP programme. **Fork this template**, rename
 | Project title | Replication and Extension of the Electric Vehicle-Routing Problem with Time Windows and Recharging Stations |
 | Project tag | EVRP-TW |
 | Track | Research |
-| Supervising faculty | Dr. Tianxing Cui (Department of Mathematical Sciences) |
-| Project lead | To be confirmed |
+| Supervising faculty | Dr. Tianxing Cui |
+| Project lead | Fuhua JIA (20618753), Department of Mechanical, Materials and Manufacturing Engineering |
 | Team or individual | Individual |
 | Cited paper being replicated | Michael Schneider, Andreas Stenger, and Dominik Goeke (2014), [The Electric Vehicle-Routing Problem with Time Windows and Recharging Stations](https://doi.org/10.1287/trsc.2013.0490), *Transportation Science*, 48(4), 500-520. DOI: `10.1287/trsc.2013.0490` |
 
@@ -173,8 +173,8 @@ uv run python -m evrptw.experiments.stage00_baseline run \
 
 Full raw logs remain under the ignored `results/` directory. The curated,
 checksum-protected baseline is tracked under `experiments/baselines/stage00/`.
-See [the Stage 0 baseline protocol](docs/stage00_baseline.md) for verification
-and candidate-comparison commands.
+See the Stage 0 section of [the roadmap](ROADMAP.md) for verification and
+candidate-comparison commands.
 
 ### Stage 1 lexicographic objective
 
@@ -184,9 +184,8 @@ hard-rejects moves that add a vehicle, and the small exact BPC reference uses
 the same objective for its incumbent and optimality claim. Stage 0 remains an
 immutable historical baseline.
 
-See [the Stage 1 objective protocol](docs/stage01_lexicographic_objective.md)
-for the comparison interface, acceptance policy, experiment schema, and
-reproduction command.
+See the Stage 1 section of [the roadmap](ROADMAP.md) for the comparison
+interface, acceptance policy, experiment schema, and reproduction command.
 
 - [Stage 1 per-run results](experiments/summaries/stage01_per_run_results.csv)
 - [Stage 1 summary](experiments/summaries/stage01_summary_results.csv)
@@ -202,9 +201,8 @@ maximum iterations, and one thread. Every run is validated independently and
 records raw JSON, solution routes, operator events, failure reasons, environment
 metadata, and comparison gates.
 
-See [the Stage 2.1 route-reduction protocol](docs/stage02_route_reduction.md)
-for the implementation invariants, fixed experiment scope, failure loop, and
-acceptance gates.
+See the Stage 2.1 section of [the roadmap](ROADMAP.md) for the implementation
+invariants, fixed experiment scope, failure loop, and acceptance gates.
 
 ```bash
 uv run pytest
@@ -236,7 +234,7 @@ Stage 2.2 adds `relocate`, `swap`, `two_opt_star`, `route_segment_destroy`, and
 bounded `ejection_chain` proposals behind the `stage02_route_quality` profile.
 The profile keeps the fixed Stage 0 scope and compares against the accepted
 Stage 2.1 per-run results. Its protocol, failure rounds, and independent rerun
-are documented in [the Stage 2.2 protocol](docs/stage02_route_quality.md).
+are documented in the Stage 2.2 section of [the roadmap](ROADMAP.md).
 
 ```bash
 uv run python -m evrptw.experiments.stage02_route_quality \
@@ -458,10 +456,10 @@ Any **leave of absence** or **withdrawal** must be notified to us **by email** â
 ## Quick checklist
 
 - [x] Forked the template and renamed the repo (`FURP-2026-Yiyang-GUO-EVRP-TW`)
-- [ ] Made the repo public **or** shared it with the research group
+- [x] Made the repo public **or** shared it with the research group
 - [x] Filled in the *Project Info* table above
 - [x] Created `docs/01_weekly.md` from the weekly template
-- [ ] Created my first file in `docs/meeting_notes/`
+- [x] Created my first file in `docs/meeting_notes/`
 - [x] (By Showcase) Added `FURP_Showcase.pdf` to the repo root
 
 ---

@@ -9,4 +9,4 @@ This directory preserves the second full 36-run execution used to audit the froz
 
 The full second-run raw logs and solutions remain under the Git-ignored
 `results/stage00-reproduction/` directory. The tracked audit is evidence for the repeatability
-finding documented in `docs/stage00_baseline.md`; it is not a replacement baseline.
+finding documented in the Stage 0 section of `ROADMAP.md`; it is not a replacement baseline.

@@ -375,7 +375,7 @@ Stage 2 is split into three profiles: 2.1, 2.2, and 2.3. The formal scope is fix
 
 - Stage 2.3 already has lane-local caching and unchanged-route precomputation, and records cache hits/misses, unique route evaluations, and exact calls; but the auditable global cache, incremental propagation, interruptible exact solver, and parallel acceleration required by Stage 3 are not yet implemented. Therefore `median exact calls <= 100` and `median effective iterations >= 50` remain Stage 3 targets and must not be claimed as achieved in Stage 2.3.
 - The final review artifacts include `review_report.md`, `review_findings.csv`, `failure_analysis.csv`, `stage03_readiness.csv`, and `review_manifest.json`. The Stage 0 manifest SHA-256 remains `b226b97e0e67288aaaf85726ad855df71cb81406685c57c8e8c40cd8996aa0da`.
-- Traceable evidence lives in `docs/stage02_constraint_guided.md`, `docs/stage02_constraint_guided_review.md`, and `experiments/summaries/stage02_constraint_guided_rerun09_review_report.md`, `stage02_constraint_guided_rerun09_failure_analysis.csv`, and `stage02_constraint_guided_rerun09_stage03_readiness.csv`.
+- Traceable evidence lives in `experiments/summaries/stage02_constraint_guided_rerun09_review_report.md`, `stage02_constraint_guided_rerun09_failure_analysis.csv`, and `stage02_constraint_guided_rerun09_stage03_readiness.csv`.
 
 ### Stage 2.3 review: why this round of activity took so long
 
@@ -649,7 +649,7 @@ Instance-name mapping: the literature notation `C101-5` maps to the repository's
 
 The model-compatibility assessment covers five dimensions: charging model (full recharge — compatible), objective function (published BKS use vehicle-count-first distance minimisation without charging time or count terms — incompatible), distance metric (published BKS possibly use rounded Euclidean distances — incompatible), time windows (compatible), vehicle parameters (compatible). The overall compatibility is `False`. Because the models are not fully identical, no gaps are computed; all 92 instances are marked `model_compatible=False` in `experiments/baselines/schneider_best_known.csv`.
 
-Implementation files: core data module `src/evrptw/best_known.py` (92 BKS records, source citations, compatibility assessment); experiment runner `src/evrptw/experiments/stage051_best_known.py`; independent review CLI `src/evrptw/experiments/stage051_best_known_review.py` (5 gates: `instance_coverage`, `bks_values_present`, `no_gap_computation`, `compatibility_assessment_correct`, `replay_consistency`); config `configs/stage051_best_known.toml`; document `docs/stage051_best_known.md`; unit tests `tests/test_stage051.py` (48 tests, all passing). Ruff and mypy pass; the full repository suite of 254 tests passes.
+Implementation files: core data module `src/evrptw/best_known.py` (92 BKS records, source citations, compatibility assessment); experiment runner `src/evrptw/experiments/stage051_best_known.py`; independent review CLI `src/evrptw/experiments/stage051_best_known_review.py` (5 gates: `instance_coverage`, `bks_values_present`, `no_gap_computation`, `compatibility_assessment_correct`, `replay_consistency`); config `configs/stage051_best_known.toml`; unit tests `tests/test_stage051.py` (48 tests, all passing). Ruff and mypy pass; the full repository suite of 254 tests passes.
 
 The formal run executes on a clean commit; after review approval, `experiments/registries/stage05.1_artifact_registry.csv` and `experiments/manifests/stage05.1_best_known_artifact_manifest.json` are published, with review status `READY_FOR_STAGE05_2`.
 
@@ -665,7 +665,7 @@ Stage 5.2 maintains a single continuously iterated current implementation, inter
 - `stage05.2_accelerator_pilot_attemptNN`;
 - `stage05.2_benchmark_attemptNN`.
 
-The full execution protocol is in `docs/stage052_performance_benchmark_workflow.md`. The entry point of Stage 5.2 must be the independent review status `READY_FOR_STAGE05_2` of `stage05.1_best_known_attempt06`, inheriting the Stage 4 accepted formal identity `stage04_adaptive_weights_attempt15`.
+The full execution protocol is this section together with the Stage 5.2 governance rules in `AGENTS.md`. The entry point of Stage 5.2 must be the independent review status `READY_FOR_STAGE05_2` of `stage05.1_best_known_attempt06`, inheriting the Stage 4 accepted formal identity `stage04_adaptive_weights_attempt15`.
 
 The current chain is determined by signed manifests, prerequisite identities, and `experiments/registries/stage05.2_retention_registry.csv`; specific attempts are not hard-coded in this roadmap. Old runs' statuses, failure reasons, historical relations, and archive locations go into the registry and the change log; only the current accepted predecessor can open the next gate.
 
@@ -726,7 +726,7 @@ This is a governance rule spanning A–G; it does not add an eighth performance 
 3. `archive` must bind the inventory hash and verify per-directory file counts, byte counts, and tree SHA-256 before migration;
 4. complete, partial, failed, `NOT_READY`, and superseded raw are all archived to `d_archive/stage05.2/history/<run_label>/`;
 5. the repository keeps only the lightweight retention registry, the change log, and the scientific summaries published by independent review;
-6. `docs/stage052_change_log.md` continuously appends modification reasons, impact scope, evidence effects, verification results, and the related run identities; it does not copy new version directories;
+6. the Stage 5.2 change log — recorded in `AGENTS.md` for governance changes and per run in the retention registry for implementation changes — continuously appends modification reasons, impact scope, evidence effects, verification results, and the related run identities; it does not copy new version directories;
 7. archived runs are resolved through the registry's run label and archive alias, re-verified on file counts, byte counts, and tree SHA-256 before use as prerequisite/review inputs; tracked documents do not contain machine-local absolute paths;
 8. active/unsealed runs are denied archiving by default, and the registry merges incrementally by immutable run identity. Same-volume moves use atomic rename; cross-volume moves first copy to a temporary directory on the target volume, and only after full re-verification and atomic placement is the source directory cleaned.
 

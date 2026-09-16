@@ -726,8 +726,8 @@ this repository or one of its subdirectories.
   runner, or documentation may claim Stage 5.2 completion before both review
   and tracked publication pass.
 
-The executable workflow and gate table are maintained in
-`docs/stage052_performance_benchmark_workflow.md`.
+The executable workflow and gate table are maintained in the Stage 5.2 section
+of `ROADMAP.md`.
 
 ## Experiment Artifact Storage Policy and v2 Transition
 
