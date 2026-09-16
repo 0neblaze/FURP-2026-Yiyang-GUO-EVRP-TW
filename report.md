@@ -49,7 +49,7 @@ The project has advanced to **Stage 5.2 G (benchmark)**: the Pilot passed (attem
 | `data/schneider/` | 92 Schneider benchmark instances + SHA256SUMS (git-ignored) | 94 files |
 | `document/literature/` | 6 VOR journal-paper PDFs + 2 alternative copies + SHA256SUMS + references.bib (git-ignored) | 11 files |
 | `docs/` | Weekly reports, stage protocols, method documents, publication-landscape survey | 24 md + 1 bib (worktree) |
-| `poster/` | Poster v2 engineering sources (design/story docs, rebuild scripts, figure assets); final artifacts live at the repo root as `poster.pdf`/`poster.pptx` | 12 files |
+| `poster/` | Poster v2 engineering sources (design/story docs, rebuild scripts, figure assets); final artifacts live at the repo root as `FURP_Showcase.pdf`/`poster.pptx` | 12 files |
 
 ---
 
@@ -246,7 +246,7 @@ The trust design of this repository exceeds a typical undergraduate project and 
 
 ### 7.4 Showcase Materials
 
-- `poster.pdf` + `poster.pptx` (repo root): the final showcase poster v2 artifacts (render-verified PDF exported via PowerPoint COM); they supersede the v1 `FURP_Showcase.pdf`/`FURP_Showcase_Poster.pptx` pair (v1 preserved in history at fd02d6a). Note the README checklist still names the v1 filename for the FURP certificate rule
+- `FURP_Showcase.pdf` + `poster.pptx` (repo root): the final showcase poster v2 artifacts (render-verified PDF exported via PowerPoint COM); they supersede the v1 `FURP_Showcase.pdf`/`FURP_Showcase_Poster.pptx` pair (v1 preserved in history at fd02d6a); the root PDF keeps the certificate-required filename
 - `poster/`: the v2 poster engineering — `STORY.md` (narrative: Motivation → Method → Experiment → Results → Honest claims), `DESIGN.md` (A0-portrait layout mapping, palette #10263B/#2E6CA4, overflow-budget verification), `rebuild_poster.py`/`make_chart.py` (on-the-fly data extraction + assertions verifying 87→76), `verify_render.txt` (render-text verification)
 - Poster headline claims (all traceable): −12.6% vehicles, zero regressions, −5.1% distance, 36/36 feasible, −22.0% CPU, EVIDENCE AT SCALE (12,121 files / 200,731 event rows / 20 real failure cases / 0 synthetic)
 
@@ -301,7 +301,7 @@ There is also harmless noise: SQLite temp files locked during teardown (WinError
 ### 9.3 Certificate-Condition Cross-Check (Three FURP Rules)
 
 - Attendance > 50%: continuously recorded in weekly reports (W1 notes the supervisor had not booked a room; W4 unrecorded)
-- `poster.pdf` (the final showcase poster) placed at the repository root ✓ (replaces the v1 `FURP_Showcase.pdf`; the README certificate checklist still names the v1 filename)
+- `FURP_Showcase.pdf` (the final showcase poster v2) placed at the repository root ✓ — satisfies the certificate filename rule; v1 content preserved in history at fd02d6a
 - Poster Showcase: poster v2 rebuilt and ready (pending presentation)
 
 ---

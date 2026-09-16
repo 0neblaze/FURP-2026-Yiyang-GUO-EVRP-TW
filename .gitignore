@@ -55,7 +55,7 @@ Thumbs.db
 *.vrp
 *.instance
 *.pdf
-!/poster.pdf
+!/FURP_Showcase.pdf
 data/
 
 # Curated experiment summaries that are small enough to review
