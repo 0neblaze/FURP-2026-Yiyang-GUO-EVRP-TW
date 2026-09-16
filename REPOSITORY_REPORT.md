@@ -49,7 +49,7 @@ The project has advanced to **Stage 5.2 G (benchmark)**: the Pilot passed (attem
 | `data/schneider/` | 92 Schneider benchmark instances + SHA256SUMS (git-ignored) | 94 files |
 | `document/literature/` | 6 VOR journal-paper PDFs + 2 alternative copies + SHA256SUMS + references.bib (git-ignored) | 11 files |
 | `docs/` | Weekly reports, stage protocols, method documents, publication-landscape survey | 24 md + 1 bib (worktree) |
-| `poster_rebuild/` | Poster v2 rebuild engineering (untracked at audit time) | 14 files |
+| `poster/` | Poster v2 engineering package (tracked) | 14 files |
 
 ---
 
@@ -247,7 +247,7 @@ The trust design of this repository exceeds a typical undergraduate project and 
 ### 7.4 Showcase Materials
 
 - `FURP_Showcase.pdf` (892 KB) + `FURP_Showcase_Poster.pptx`: **submitted** (fd02d6a), satisfying two of the three FURP certificate rules
-- `poster_rebuild/` (untracked at audit time; now committed alongside this report): the v2 rebuild engineering — `STORY.md` (narrative: Motivation → Method → Experiment → Results → Honest claims), `DESIGN.md` (A0-portrait layout mapping, palette #10263B/#2E6CA4, overflow-budget verification), `rebuild_poster.py`/`make_chart.py` (on-the-fly data extraction + assertions verifying 87→76), `FURP_Showcase_Poster_v2.pptx/pdf`, `verify_render.txt` (render-text verification)
+- `poster/`: the v2 poster engineering — `STORY.md` (narrative: Motivation → Method → Experiment → Results → Honest claims), `DESIGN.md` (A0-portrait layout mapping, palette #10263B/#2E6CA4, overflow-budget verification), `rebuild_poster.py`/`make_chart.py` (on-the-fly data extraction + assertions verifying 87→76), `FURP_Showcase_Poster_v2.pptx/pdf`, `verify_render.txt` (render-text verification)
 - Poster headline claims (all traceable): −12.6% vehicles, zero regressions, −5.1% distance, 36/36 feasible, −22.0% CPU, EVIDENCE AT SCALE (12,121 files / 200,731 event rows / 20 real failure cases / 0 synthetic)
 
 ### 7.5 Literature Collection (`document/literature/`, git-ignored)
@@ -288,7 +288,7 @@ There is also harmless noise: SQLite temp files locked during teardown (WinError
 `git status` shows:
 
 - **17 tracked documents deleted in the worktree (not staged)**: `docs/stage00_baseline.md`, `stage01_lexicographic_objective.md`, `stage02_{route_reduction,route_quality,constraint_guided,constraint_guided_review}.md`, `stage03_{measurement,artifact_registry}.md`, `stage031/032/033/034_*.md`, `stage051_best_known.md`, `stage052_{change_log,performance_benchmark_workflow}.md`, `cpu_batch_pilot.md`, and the root `EVRP-TW主Baseline分阶段改进路线图.md`. All are fully preserved in git HEAD (several citations in this report were taken from HEAD). If the deletion was unintentional, run `git restore docs/`.
-- **Untracked new directories**: `.workbuddy/` (AI workspace), `docs/research/` (publication-landscape survey), `poster_rebuild/` (poster v2 engineering — now committed with this report).
+- **Untracked new directories**: `.workbuddy/` (AI workspace) and `docs/research/` (publication-landscape survey); the poster v2 engineering is tracked under `poster/`.
 - In the README quick checklist, "share with the research group / public repository" and "first meeting_notes file" remain unchecked.
 
 ### 9.2 Project-Level Open Items

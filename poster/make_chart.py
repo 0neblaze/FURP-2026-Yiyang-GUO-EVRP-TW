@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 S0 = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\experiments\baselines\stage00\per_run_results.csv"
 A16 = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\experiments\summaries\stage02_constraint_guided_attempt16_per_run_results.csv"
-OUT = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\poster_rebuild\assets\fig6_savings.png"
+OUT = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\poster\assets\fig6_savings.png"
 
 
 def load(path, vcol):
