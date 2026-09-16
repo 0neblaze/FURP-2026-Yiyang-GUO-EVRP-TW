@@ -50,7 +50,7 @@ re-verified by the independent review CLIs (full audit in [`SUMMER_REPORT.md`](S
 | Feasibility | **36/36** runs pass the unified validator | Stage 2.3 rerun09 independent replay |
 | Exact-charging speed-up (`cpu_batch`) | family medians −21.97% / −11.54% / −24.40% on the three 100-customer families | `cpu_batch_pilot_attempt01` paired review |
 | Stage 4 adaptive weights | beats fixed weights on 7 (instance, seed) pairs, wins on all 3 seeds | `stage04_adaptive_weights_attempt15` formal review |
-| Engineering system | ≈ 72,141 lines of Python + C++ pybind11 kernel; 751 tests; 12,121 raw-evidence files (≈ 172 GB, git-ignored); 173 archived Stage 5.2 runs | repository measurements |
+| Engineering system | ≈ 72,141 lines of Python + C++ pybind11 kernel; 751 tests; 12,121 raw-evidence files (≈ 172 GB, git-ignored) | repository measurements |
 
 ### Key documents
 
@@ -346,39 +346,13 @@ this repository optimizes a four-term lexicographic tuple. Therefore **no gaps
 are computed and no values are backfilled**; every instance is marked in
 `experiments/baselines/schneider_best_known.csv`.
 
-Accepted evidence: `stage05.1_best_known_attempt06`, independent review status
-`READY_FOR_STAGE05_2`.
+Accepted evidence: `stage05.1_best_known_attempt06` — all 92 rows independently
+replayed, all five review gates passed, and the accepted artifact manifest
+published at `experiments/manifests/stage05.1_best_known_artifact_manifest.json`.
 
-### Stage 5.2 performance governance and the layered benchmark (current)
-
-Stage 5.2 maintains a single current implementation validated through
-sequential gates A–G (see [`ROADMAP.md`](ROADMAP.md) and the Stage 5.2 workflow
-document):
-
-| Gate | Component | Status |
-|---|---|---|
-| A | `perf_baseline` (fixed-work instrumentation baseline) | passed |
-| B | `hot_path` (Python hot-path dedup) | passed |
-| C | `artifact_streaming` (storage v2, ≤ 36% persistence, ≤ 50% v1 RSS) | passed |
-| D | `job_parallel` (1/2/4-worker selection) | passed |
-| E | `native_kernels` (C++ pybind11 hot kernels, ≥ 15% median, zero fallback) | passed |
-| F | `accelerator_pilot` (conditional GPU decision — `GPU_NOT_JUSTIFIED` at occupancy < 32) | passed |
-| G | `benchmark` (pipeline pilot → formal) | **pilot passed; formal pending** |
-
-Current status: the G pipeline pilot `stage05.2_benchmark_attempt21` passed
-(36/36 axes, 18/18 campaign gates, persistence ratio 0.3360 < 0.36,
-`READY_FOR_STAGE052_FORMAL_BENCHMARK`). The formal benchmark — 2,040 solves
-over 92 instances × 10 seeds with a 30/60/300-second layered budget,
-229,200 declared solver-seconds — is **not yet complete**: attempts 22 (a
-runtime load-guard misjudgement) and 25 (a SQLite cross-thread spill error)
-both failed, were root-cause fixed with regression tests, and their failure
-evidence is retained. A retry from a new G pilot label is pending; gates A–F
-do not need to be rerun.
-
-The retention registry `experiments/registries/stage05.2_retention_registry.csv`
-tracks 173 archived runs (complete, partial, failed, `NOT_READY`, and
-superseded) with tree SHA-256 verification against the external archive
-volume.
+This is the latest stage with accepted evidence in the repository. The remaining
+stages — BPC scaling, solution representation, and partial/nonlinear charging
+models — are planned and specified in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 

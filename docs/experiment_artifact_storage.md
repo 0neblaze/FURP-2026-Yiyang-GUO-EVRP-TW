@@ -8,8 +8,8 @@ the unified validator, vehicle-first acceptance, or exact charging.
 
 The repository retains `artifact-storage-v2` as the storage policy, defined in
 `src/evrptw/artifacts.py`; the current physical evidence uses `screening_decisions_v3`
-and continues to read v1, older v2, and legacy evidence. Stage 5.2 maintains a single
-current code base; A–G are sequential gates, not separate versions. The historical
+and continues to read v1, older v2, and legacy evidence. Every benchmark stage maintains a
+single current code base; its internal gates are sequential steps, not separate versions. The historical
 statuses, failure reasons, and prerequisite relations of specific attempts are
 recorded in raw manifests, the retention registry, and the change log — not
 hard-coded into long-term policy.
@@ -64,15 +64,15 @@ results/<run_label>/
   review/
 ```
 
-v1 does not require the shard manifest; the last two items were added by v2. The
-Stage 5.2 Pilot/Formal adds internal batch directories such as `batch0001` under the
+v1 does not require the shard manifest; the last two items were added by v2. Layered
+campaigns add internal batch directories such as `batch0001` under the
 top-level canonical run, and registers the logical path, root alias, volume
 identity, byte count, and checksum through signed campaign/batch manifests; a batch
 must not masquerade as a new attempt. `failure` files may be omitted when not
 applicable, but the manifest must record `artifact_status.failure=not_applicable`.
 All raw evidence is first written to a Git-ignored active staging root; after the
 run is sealed, the retention interface verifies the complete tree SHA-256 and byte
-counts and moves it into `d_archive/stage05.2/history/<run_label>/`. Tracked
+counts and moves it into the archive root's `history/<run_label>/`. Tracked
 summaries can be published only by an independent reviewer after the raw replay
 passes.
 
@@ -156,13 +156,13 @@ in the workspace.
 
 ## The v2 replacement gate
 
-`stage05.2_artifact_streaming_attemptNN` must simultaneously satisfy:
+A v2 storage replacement must simultaneously satisfy:
 
 1. under the same fixed-work inputs, v1/v2 agree completely on validator, objective,
    critical-event, exact-call, candidate/cache, and failure semantics;
 2. v1 history and existing bundles continue to pass the same reader/reviewer;
 3. artifact persistence time does not exceed 36% of end-to-end time;
-4. peak RSS does not exceed 50% of the Stage 5.2 v1 baseline;
+4. peak RSS does not exceed 50% of the v1 baseline;
 5. partial/timeout/worker failures all produce verifiable shard manifests and fail
    fast;
 6. an independent reviewer recomputes all summaries from raw shards and does not
@@ -184,9 +184,9 @@ to be read through the legacy/v1 reader and retain their true `storage_format`,
 `retention_class`, `policy_compliance`, dirty, failure, and publication statuses in
 the registry. Logical mapping does not imply copying or moving.
 
-## Stage 5.2 retention policy
+## Retention policy
 
-- `Stage052RetentionPolicy` fixes `workspace_full_evidence=active_only`; both
+- The retention policy fixes `workspace_full_evidence=active_only`; both
   complete and failed runs perform `archive`.
 - The audit inventory records the run label, component, status, completeness,
   source commit, prerequisite identities, file count, total bytes, and tree
@@ -202,7 +202,7 @@ the registry. Logical mapping does not imply copying or moving.
   pre-refactor historical migration may explicitly override, binding the expected
   directory count and total bytes at the same time. Registry updates must merge
   atomically by run label; overwriting historical rows is forbidden.
-- The lightweight `stage05.2_retention_registry.csv` records only archive aliases
+- The lightweight retention registry records only archive aliases
   and relative paths, never machine-local absolute paths. Detailed implementation
   changes are recorded through the retention registry and, for governance
   changes, in `AGENTS.md`.
@@ -226,7 +226,7 @@ fingerprint, row count, byte size, shard identity, and raw-to-summary consistenc
 An independent reviewer must first verify the run/shard manifests, then replay the
 raw solutions, events, trace index, route dictionary, validator, and objective.
 
-From Stage 5.2 D onward, the `worker_identity` of a worker-owned shard must be the
+The `worker_identity` of a worker-owned shard must be the
 PID of the actually executing process and must be findable in the same run's 50 ms
 process-tree resource samples; multi-worker runs are forbidden from recording the
 parent PID as the shard owner. The resource summary, raw/solution/trace, and
@@ -239,7 +239,7 @@ sidecar, and the identical composite event identity in the trace index.
 Performance axes must be serial and non-overlapping in configuration order;
 finalisation may begin only after the last axis completes.
 
-Stage 5.2 re-reviews must not overwrite manifest-protected reports/findings in
+Re-reviews must not overwrite manifest-protected reports/findings in
 place. New reports and findings are first written to
 `review/generations/<content-sha256>/` and fsynced; only then is
 `review_manifest.json` — the single trusted pointer — atomically replaced. The
@@ -248,6 +248,6 @@ manifest, report, and findings of the previously accepted review are archived un
 interrupted, the old manifest and its referenced files remain verifiable, and
 orphan generations do not count toward gates.
 
-From Stage 5.2 onward, reports must separate solver time, artifact persistence
+Reports must separate solver time, artifact persistence
 time, and end-to-end time; CPU utilisation, chip power, kernel time, or compression
 ratio alone cannot constitute a speedup conclusion.

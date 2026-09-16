@@ -502,8 +502,8 @@ this repository or one of its subdirectories.
   vehicle values), `no_gap_computation` (no gap columns in the BKS CSV),
   `compatibility_assessment_correct` (CSV matches the canonical
   `COMPATIBILITY_ASSESSMENT`), and `replay_consistency` (CSV values match the
-  canonical `BEST_KNOWN_VALUES`). The review reports `READY_FOR_STAGE05_2`
-  only when all five gates pass.
+  canonical `BEST_KNOWN_VALUES`). The review reports its terminal acceptance
+  status only when all five gates pass.
 - Stage 5.1 v6 requires the published Stage 4 v6 Formal prerequisite
   (`stage04_adaptive_weights_attempt15`, Formal scope, 144 axes, and matching
   review identity), canonical single-level run layout, exact CSV schemas, unique
@@ -523,211 +523,12 @@ this repository or one of its subdirectories.
   requires the exact Stage 4 Formal identity (`scope=formal`, 144 axes, and a
   matching review run label). The accepted v6 evidence is
   `stage05.1_best_known_attempt06`: its 92-row independent replay passes all
-  five gates and reports `READY_FOR_STAGE05_2`, inheriting the published
-  `stage04_adaptive_weights_attempt15` Formal review. All earlier attempts
-  remain preserved superseded evidence.
+  five gates and reports its terminal acceptance status, inheriting the
+  published `stage04_adaptive_weights_attempt15` Formal review. All earlier
+  attempts remain preserved superseded evidence.
 - The artifact registry is
   `experiments/registries/stage05.1_artifact_registry.csv` and the manifest
   is `experiments/manifests/stage05.1_best_known_artifact_manifest.json`.
-
-## Stage 5.2 Performance and Benchmark Policy
-
-- Stage 5.2 starts only from accepted `stage05.1_best_known_attempt06` with
-  review status `READY_FOR_STAGE05_2`, inheriting the accepted Stage 4 Formal
-  identity `stage04_adaptive_weights_attempt15`. It is one continuously
-  maintained implementation. A--G are ordered evidence gates inside that one
-  implementation: `perf_baseline`, `hot_path`, `artifact_streaming`,
-  `job_parallel`, `native_kernels`, optional `accelerator_pilot`, then
-  `benchmark`; they are not separately maintained software versions.
-- `stage05.2_<component>_attemptNN` and `rerunNN` are unique run identities,
-  not version names. A failed or interrupted run consumes its label and shards
-  may never be imported into another run, but bulky evidence need not remain in
-  the repository workspace. Current-chain truth comes from signed manifests,
-  prerequisite references, and `stage05.2_retention_registry.csv`, never from a
-  hard-coded attempt number in policy documentation.
-- Full Stage 5.2 evidence exists in the active staging root only while it is
-  being produced or reviewed. Complete, partial, failed, `NOT_READY`, and
-  superseded runs are checksum-verified and archived under the configured
-  `d_archive` alias at `stage05.2/history/<run_label>/`; the workspace retains
-  only the signed retention inventory, lightweight registry, change log, and
-  independently published summaries. Archive failure or identity mismatch
-  retains the source and fails immediately.
-- Retention audit rejects active, planned, unknown, or otherwise unsealed runs
-  by default. The one-time pre-redesign historical override must bind the
-  expected directory count and byte count. Same-volume archival uses atomic
-  rename; cross-volume archival copies to a hidden target-volume temporary
-  directory, verifies the full identity, atomically publishes it on that
-  volume, and only then removes the source. Registry updates merge by immutable
-  run identity and may never replace unrelated historical rows.
-- Archived prerequisite or review input is resolved by run label through
-  `stage05.2_retention_registry.csv` plus the local storage-root locator. The
-  resolver must recheck the registered file count, byte count, and tree SHA-256
-  before returning a path to an existing runner or reviewer; policy files and
-  callers must not embed the machine-local archive path.
-- A registered archive tree is immutable. Reviewers may consume it as a
-  comparison, prerequisite, or replay input, but may not publish a new review
-  generation inside it. A run that still needs review publication remains in
-  the active root until that generation is sealed, then it is archived.
-- `artifact-storage-v2` with physical schema `screening_decisions_v3` uses
-  typed bounded Parquet streams, 65,536-row groups, at most two non-empty buffer
-  groups, and compatible v1/old-v2/v3/legacy reads. Canonical semantic digests
-  are computed over expanded logical events, so physical IDs and compression
-  layout cannot change replay. Persistence is at most 36% of end-to-end time
-  and peak RSS is at most 50% of the Stage 5.2 v1 baseline.
-- Job-parallel selection compares 1/2/4 workers on the fixed four-instance,
-  three-seed scope. Two workers require at least 1.5x speedup and at most 12 GiB
-  aggregate RSS; four workers are selected only at 2.5x and at most 12 GiB.
-  Worker ownership uses real PIDs and cumulative process CPU samples; worker
-  failure aborts without fallback.
-- Native-kernel promotion must preserve Python/native objective, validator,
-  exact ordering, candidate/cache/event semantics, and zero fallback across all
-  fixed-work axes. Aggregate 100-customer paired median end-to-end improvement
-  must be at least 15%, no C/R/RC family may regress by more than 3%,
-  persistence must remain at most 36%, each worker RSS at most 4,357,382,144
-  bytes, and process-tree RSS at most 12 GiB.
-- The accelerator gate independently recomputes 100-customer batch occupancy.
-  Median below 32 publishes `GPU_NOT_JUSTIFIED`; median at least 32 requires the
-  registered helper, exact fixed-work equality, at least 15% aggregate
-  improvement, and no family regression over 3%. Missing helper, fallback, or
-  an unaudited campaign adapter is `NOT_READY`.
-- The pipeline pilot is exactly 12 instances x 3 seeds x one 30-second axis and
-  exercises resource sampling, failure recovery, bounded replay, 1/5/10/30
-  second anytime checkpoints, configured archive roots, and interrupted
-  publication recovery. Formal contains exactly 920 indivisible
-  `(instance, seed)` shards, 2,040 runs, 229,200 declared solver seconds, and
-  10,400 anytime rows. Only independent review may open Formal or report
-  `READY_FOR_STAGE05_3`.
-- Campaign preflight keeps the fixed `load1 <= 4.0` idle-host gate. During a
-  batch, the auditable total-load ceiling is `4.0 + selected_workers`, because
-  the selected campaign workers are expected load; unrelated user CPU remains
-  a separate PID-tree-excluding hard gate at one full core. AC power and low
-  power mode remain continuous hard gates.
-- G may consume accepted F evidence from an older revision only when the
-  current revision is its Git descendant and the entire intervening diff is
-  confined to the explicit G campaign runner, artifact-persistence adapter,
-  reviewer, test, and documentation allowlist. The independent reviewer
-  repeats this diff audit. Runtime
-  selection identity still freezes Python, dependencies, machine, source
-  mount, native extension, configuration, instances, backend, and workers;
-  solver, objective, configuration, native, or other source drift is a hard
-  failure and requires a new prerequisite rather than a G-only continuation.
-- Candidate events retain both customer-sequence route identity and the
-  complete exact-charging depot/station route identity. Independent review
-  validates every accepted global-best complete route and objective and
-  requires its customer projection to equal the recorded customer sequence;
-  either identity missing or drifting is a hard failure.
-- Deadline boundaries are lane-local because the constraint-guided profile
-  reserves its final 0.1-second slice after the legacy/quality deadline.
-  Independent replay forbids exact work, cache stores, or candidate acceptance
-  after a boundary in the same lane and independently rejects any exact
-  completion or accepted candidate beyond the axis wall-clock budget. A
-  legacy/quality boundary must not terminate valid constraint-lane work that
-  remains within the overall axis budget.
-- Local absolute paths live only in the ignored storage-root locator. Tracked
-  evidence records aliases, relative archive paths, volume identities, run
-  status, source revision, prerequisite identities, byte count, and checksum.
-  Batch target/hard cap remains 24/32 GiB and shard hard cap remains 2 GiB.
-  Producer, retention, performance review, and campaign review must all use the
-  shared cross-platform `probe_volume_identity`; WSL uses `findmnt`, DrvFS
-  additionally binds the Windows NVMe identity, and macOS uses `diskutil`.
-  Reviewer-local platform probes are forbidden contract drift.
-  Campaign rolling-capacity replay must derive its reserves from the rebuilt
-  identity-matched `BenchmarkCampaignConfig`: WSL active/future staging uses
-  50 GiB safety plus 32 GiB active workspace, final WSL safety is 50 GiB, and
-  internal archive safety is 50 GiB. Reviewer-local reserve constants or lower
-  thresholds are forbidden contract drift.
-  The sealed reviewer wheel must include and source-bind every tracked
-  `tools` Python module used by review or publication dry-run paths; isolated
-  `python -I` review services may not depend on an unsealed checkout import.
-  `source_snapshot` is a mandatory common Pilot/Formal campaign review gate,
-  including provisional Pilot publication; it may not exist only as an
-  unregistered extra gate outside the exact gate-set contract.
-  Current-chain performance reviews require their three-file generation with
-  `semantic_mismatches.csv`; Benchmark campaign prerequisites instead require
-  the complete content-addressed campaign publication surface. The generic
-  verifier must not impose the performance-only mismatch filename on campaigns.
-  A Benchmark campaign review must publish `selected_optimization_profile` at
-  the top level as well as inside `selection_lock`; the next campaign loader
-  rejects a review whose frozen top-level execution selection is incomplete.
-- Formal review uses bounded Arrow batches and streaming iterators and rejects
-  full-shard `to_pylist()`, `read_events()`, or `reconstruct_trace()`. It
-  independently verifies exact campaign geometry, bidirectional descriptors,
-  objective/validator and exact/cache/candidate/deadline semantics, resource
-  and persistence gates, power/load/root/runtime provenance, BKS incompatibility,
-  and the absence of gap columns.
-- Stage 5.2 storage replay hashes canonical records as they are read. It must
-  never accumulate a complete axis or bundle of event dictionaries. Multiple
-  raw bundles are replayed strictly in input order, one fresh spawned process
-  per bundle; the parent retains digest maps only. Field-level mismatch output
-  is generated only for unequal fixed-work axes through a disk-backed temporary
-  spool. Unequal wall-clock axes emit one aggregate digest row per
-  `(instance, seed, axis)` instead of expanding expected trajectory differences.
-  The spool stores one compressed canonical record per row and expands fields
-  only while comparing; per-field database rows are forbidden because they
-  amplify disk usage and cgroup page cache. Only the comparison bundle may be
-  spooled: candidate records point-query comparison rows while left-only rows
-  are derived from each axis's final ordinal tail; bulk DELETEs that dirty the
-  SQLite file are forbidden. Per-axis fragments, the final mismatch CSV, and
-  publication copies periodically fsync and release clean page cache with
-  `POSIX_FADV_DONTNEED`. SQLite construction commits/releases on a bounded
-  record window; fragment release uses one aggregate byte window shared by
-  all axes and the left-only tail. Raw manifest hashing and Parquet/JSONL
-  iterators release their source page cache at file-lifecycle boundaries.
-  BLOB temp sorts are forbidden. The mismatch CSV is
-  streamed through temporary-file
-  hashing and publication and is never accumulated as one in-memory payload.
-- On the Windows/WSL2 formal host, long-running Stage 5.2 reviewers must run as
-  transient `systemd --user` services rather than Codex desktop child
-  processes. The service uses `MemoryHigh=5G`, `MemoryMax=6G`,
-  `MemorySwapMax=2G`, no restart/fallback, an internal 5.5-GiB aggregate-RSS
-  stop, external progress logs, and an `ExecStopPost`-sealed execution receipt.
-  Formal launch rejects a dirty producer snapshot, arbitrary command, raw
-  run-label mismatch, unsealed reviewer revision, or reviewer Python whose
-  installed files do not match the declared frozen wheel. ExecStopPost must
-  independently re-hash the raw manifest and read cgroup memory peaks. Missing
-  cgroup peak accounting is a hard receipt failure and must never be silently
-  represented as zero. Reviewer logs are operational evidence outside immutable
-  raw bundles and do not alter the
-  scientific review schema or readiness gates. The only allowlisted scientific
-  entry points are `evrptw.experiments.stage052_performance_review` and
-  `evrptw.experiments.stage052_campaign_review`; their raw/prerequisite command
-  envelopes are validated separately and both use the external progress log
-  plus the 5.5-GiB internal process-tree guard.
-  The internal limit is not operator-configurable for formal review. Launch
-  also requires the exact canonical signed raw manifest, a reviewer wheel whose
-  tracked Python/native/build inputs match the declared clean revision and whose
-  native-containing wheel matches a fresh no-cache rebuild byte-for-byte, and
-  a receipt path owned by the transient service. A READY review is consumable
-  only after `ExecStopPost` copies a finalized successful receipt, verified
-  cgroup peaks, and the current review-manifest hash into `review/`.
-  The launcher must resolve and freeze the service `PATH` for `nvidia-smi`,
-  `powershell.exe`, and `wsl.exe`, record it in the execution receipt, and fail
-  before launch if any required interoperability tool is unavailable; it must
-  not rely on an interactive shell's inherited `PATH`.
-  Producer runtime identity must be replayed by the raw-bound frozen producer
-  venv, never by the new reviewer wheel. The review-only WSL memory cap is
-  audited separately as operational receipt evidence; only that live memory
-  field may differ from the historical producer identity. New producer
-  identities use the locale-independent numeric CIM `OperatingSystemSKU`
-  together with exact Version, BuildNumber, and TotalVisibleMemorySize; the
-  localized CIM Caption is not an identity field. Historical Chinese and
-  English captions for Windows 11 Pro for Workstations remain one
-  locale-normalized reviewer identity. Every other Windows, CPU, GPU, WSL,
-  mount, NVMe, wheel, Python, native, and dependency identity remains an exact
-  hard gate.
-  A published `NOT_READY` review caused by reviewer/runtime defects must be
-  archived byte-for-byte under `review/history/<manifest-sha256>/` before an
-  explicit retry. Its hash belongs in `review_retry_history_sha256`, not the
-  accepted-review lineage; every retry archive remains a prerequisite-time
-  manifest/raw/file-hash gate and may never be deleted or silently replaced.
-- The registry, trusted manifest, and content-addressed review products are
-  published only after Formal raw replay reports `READY_FOR_STAGE05_3`. Publication is a
-  generation transaction whose trusted manifest is replaced last; no producer,
-  runner, or documentation may claim Stage 5.2 completion before both review
-  and tracked publication pass.
-
-The executable workflow and gate table are maintained in the Stage 5.2 section
-of `ROADMAP.md`.
 
 ## Experiment Artifact Storage Policy and v2 Transition
 
@@ -738,7 +539,7 @@ of `ROADMAP.md`.
 - The old non-canonical Stage 0–2 entry points remain only for historical
   compatibility tests/reproduction when their configuration has no
   `[artifact_storage]`; the shipped new configurations reject those paths.
-- The current Stage 5.2 storage policy remains `artifact-storage-v2`, while the
+- The current storage policy remains `artifact-storage-v2`, while the
   current physical schema is `screening_decisions_v3`; v1, old v2, v3,
   and legacy evidence remain readable. These formats use Parquet events,
   complete critical evidence, aggregated diagnostic evidence, 2 GiB per
@@ -747,7 +548,7 @@ of `ROADMAP.md`.
   the active staging root as `<run_label>/<instance>/<seed>/`, with control
   metadata and a manifest under `control/`, then moved intact to the configured
   archive after checksum verification.
-- Stage 5.2 preserves v1/old-v2 reads and uses typed v3
+- The current policy preserves v1/old-v2 reads and uses typed v3
   definitions/occurrences, bounded Parquet streams, shard
   manifests/checksums, worker-owned `(instance, seed)` shards, and parent-only
   control-manifest finalisation. Attempt-specific remediation history belongs
@@ -762,8 +563,8 @@ of `ROADMAP.md`.
   not.
 - v2 promotion requires v1/v2 replay equality for validator, objective,
   critical events, exact-call and failure semantics; artifact persistence must
-  be at most 36% of end-to-end time and peak RSS at most 50% of the Stage 5.2
-  v1 baseline. Partial shards are sealed with explicit completeness, fail
+  be at most 36% of end-to-end time and peak RSS at most 50% of the v1
+  baseline. Partial shards are sealed with explicit completeness, fail
   immediately, and are then archived; there is no serial persistence fallback.
 - Native producer and reviewer installations may live at different absolute venv paths; native
   identity is the sealed extension SHA-256 plus the captured runtime contract, never path equality.

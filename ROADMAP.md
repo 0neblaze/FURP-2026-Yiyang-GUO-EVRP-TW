@@ -93,7 +93,7 @@ Every formal stage and sub-stage maintains at least one corresponding artifact r
 - `alns.py`, `neighborhoods.py`, `objective.py`, the validator, and shared tests that serve multiple stages must not be renamed just to carry a stage label; their stage affiliation is recorded through profiles, the operator registry, source hashes, and manifests.
 - The Stage 0 frozen directory, historical results, and checksums must not be renamed, overwritten, or moved; only `stage00` labels and old-path mappings may be added in the artifact registry.
 - Existing `stage02_*` historical paths are legacy artifacts and must be preserved; new experiments must use the canonical `stage02.1`, `stage02.2`, or `stage02.3` labels and record the old-path-to-new-label correspondence in the manifest.
-- Failed rounds, timeouts, invalid, infeasible, and error outcomes must first seal the manifest, status, failure reason, and checksums; after the fix, a new `attemptNN` or `rerunNN` is used. Stage 5.2 large raw evidence is migrated out of the worktree only after retention-interface verification, and the lightweight registry must retain its archive identity; direct deletion without archiving, or renaming to a successful result, is forbidden.
+- Failed rounds, timeouts, invalid, infeasible, and error outcomes must first seal the manifest, status, failure reason, and checksums; after the fix, a new `attemptNN` or `rerunNN` is used. Large raw evidence is migrated out of the worktree only after retention-interface verification, and the lightweight registry must retain its archive identity; direct deletion without archiving, or renaming to a successful result, is forbidden.
 
 ### 5. Stage coverage table
 
@@ -106,7 +106,7 @@ Every formal stage and sub-stage maintains at least one corresponding artifact r
 | Stage 2.3 | `stage02.3` | `station_pressure`, `time_window_conflict`, `worst_energy_detour`, `shaw_related` |
 | Stage 3.0–3.4 | `stage03.0`–`stage03.4` | `measurement`, `screening`, `cache`, `incremental`, `parallel` |
 | Stage 4 | `stage04` | `adaptive_weights`, `restart`, `intensification` |
-| Stage 5.1–5.3 | `stage05.1`–`stage05.3` | `best_known`, `perf_baseline`, `hot_path`, `artifact_streaming`, `job_parallel`, `native_kernels`, `accelerator_pilot`, `benchmark`, `ablation` |
+| Stage 5.1, 5.3 | `stage05.1`, `stage05.3` | `best_known`, `ablation` |
 | Stage 6.1–6.3 | `stage06.1`–`stage06.3` | `pricing`, `branching`, `validation` |
 | Stage 7 | `stage07` | `solution_schema`, `validator_contract` |
 | Stage 8 | `stage08` | `partial_linear`, `piecewise_linear`, `nonlinear`, `queueing` |
@@ -117,7 +117,7 @@ Before each stage enters formal experiments or the next stage, the following mus
 
 ### 7. Data retention and evidence-layering rules (v2 policy and v3 physical schema, mandatory)
 
-From the effective date of this rule, all new Stage 0–8 runners must provide `[artifact_storage]` in their configuration and write and replay artifacts through the shared `ArtifactBundleWriter`/`ArtifactReader`. The current storage policy is `artifact-storage-v2`; the Stage 5.2 current implementation uses the `screening_decisions_v3` physical schema and continues to read v1, older v2, and legacy evidence. The Stage 5.2 pipeline pilot, formal benchmark, and subsequent stages mandatorily use the v2/v3 combination that has passed independent review by the current chain. The default physical formats are Parquet/Arrow events, critical evidence is fully retained, and diagnostic evidence is aggregated by run/lane/iteration/operator/reason; the per-instance/seed cap is 2 GiB and the per-run cap is 32 GiB.
+From the effective date of this rule, all new Stage 0–8 runners must provide `[artifact_storage]` in their configuration and write and replay artifacts through the shared `ArtifactBundleWriter`/`ArtifactReader`. The current storage policy is `artifact-storage-v2`; the current implementation uses the `screening_decisions_v3` physical schema and continues to read v1, older v2, and legacy evidence. Subsequent stages mandatorily use the v2/v3 combination that has passed independent review by the current chain. The default physical formats are Parquet/Arrow events, critical evidence is fully retained, and diagnostic evidence is aggregated by run/lane/iteration/operator/reason; the per-instance/seed cap is 2 GiB and the per-run cap is 32 GiB.
 
 v2 adds 65,536-row streaming, a writer buffer of at most two row groups, worker-owned `(instance, seed)` shards, shard manifest/checksum, and parent-only control finalisation — without rewriting v1/legacy bytes. The full migration contract is in `docs/experiment_artifact_storage.md`.
 
@@ -465,13 +465,13 @@ The independent `cpu_batch_pilot_attempt01` completed 12 paired runs over 4 inst
 
 From Stage 3.3 onward, any new code, tests, and experiments that call ALNS exact charging route evaluation must obey:
 
-- `cpu_batch` is the current default and the only formal backend for Stages 3.3–5.1; Stage 5.2 uses it as the fixed-work reference and allows only backends that pass Stage 5.2's strict replacement gates to become formal backends for Stages 5.2–8. No new experiment may run `cpu_scalar`.
+- `cpu_batch` is the current default and the only formal backend for Stages 3.3–5.1. No new experiment may run `cpu_scalar`.
 - `cpu_scalar` may be invoked only by Stage 0–3.2 historical runners that existed before 2026-07-14 together with their frozen configurations, and only to reproduce existing results; any newly created or newly configured run, regardless of stage label, must not call `cpu_scalar`, use it to generate new stage evidence, or treat it as a future performance comparison.
 - Correctness verification uses the frozen pilot consistency evidence, golden fixtures, small-scale brute-force enumeration, and unified validator recomputation; the time-consuming scalar comparison is not repeated.
 - If `cpu_batch` is unavailable, has precision conflicts, capacity overflows, or inconsistent deadline states, it must fail fast; automatic or silent fallback to `cpu_scalar` is forbidden.
 - Every formal run must record the exact backend, batch launches, transitions, packing/unpacking time, exact-call count, and total batch time in the configuration, manifest, environment, and reviewer outputs so that backend choice and performance gains are auditable.
 
-Candidate accelerations before Stage 5.2 are compared in paired equal-workload runs against `cpu_batch`. From Stage 5.2 on, replacing the formal backend requires the same instances, seeds, iterations, candidate workload, and screening/cache settings, with fully consistent candidate-work hash, route-result hash, objective tuple, validator, exact-call count, and effective iterations; the overall end-to-end median time over all 100-customer pairs must drop by at least 15%, and no C/R/RC family median may regress by more than 3%. Replacement requires independent reviewer approval; on failure, the current accepted backend stays and the complete failure evidence is retained.
+Candidate accelerations are compared in paired equal-workload runs against `cpu_batch`. Replacing the formal backend requires the same instances, seeds, iterations, candidate workload, and screening/cache settings, with fully consistent candidate-work hash, route-result hash, objective tuple, validator, exact-call count, and effective iterations; the overall end-to-end median time over all 100-customer pairs must drop by at least 15%, and no C/R/RC family median may regress by more than 3%. Replacement requires independent reviewer approval; on failure, the current accepted backend stays and the complete failure evidence is retained.
 
 #### 3.3 Exact solver interface and fixed-work diagnostics
 
@@ -623,11 +623,11 @@ Upgrade from "the algorithm can produce feasible solutions" to "solution quality
 
 ### Artifact label
 
-This stage is uniformly labeled `stage05`; the best-known, benchmark, and ablation parts use `stage05.1`, `stage05.2`, and `stage05.3` respectively; unlabeled shared summary files are not allowed.
+This stage is uniformly labeled `stage05`; the best-known and ablation parts use `stage05.1` and `stage05.3` respectively; unlabeled shared summary files are not allowed.
 
 The entry condition is not "Stage 2 is fast enough", but that Stage 3 has completed exact-call reconciliation, single-thread semantic regression, and deadline re-verification, and Stage 4 has completed the fair fixed-vs-adaptive comparison. Otherwise, expanding the benchmark only amplifies unexplainable running costs.
 
-Stage 5.2 must first complete the fixed-work baseline with the currently reviewed `cpu_batch` as the reference backend, then select the formal backend, worker count, and storage policy per this roadmap's gates. The Stage 5.2 benchmark and the Stage 5.3 ablations that still call exact charging must use the same reviewed configuration set; `cpu_scalar` must not be used as an ablation arm, a performance baseline, or a regression path. The ablation variant that removes exact charging calls no exact backend.
+The Stage 5.3 ablations that still call exact charging must use the same reviewed configuration set; `cpu_scalar` must not be used as an ablation arm, a performance baseline, or a regression path. The ablation variant that removes exact charging calls no exact backend.
 
 ### Concrete tasks
 
@@ -651,86 +651,7 @@ The model-compatibility assessment covers five dimensions: charging model (full 
 
 Implementation files: core data module `src/evrptw/best_known.py` (92 BKS records, source citations, compatibility assessment); experiment runner `src/evrptw/experiments/stage051_best_known.py`; independent review CLI `src/evrptw/experiments/stage051_best_known_review.py` (5 gates: `instance_coverage`, `bks_values_present`, `no_gap_computation`, `compatibility_assessment_correct`, `replay_consistency`); config `configs/stage051_best_known.toml`; unit tests `tests/test_stage051.py` (48 tests, all passing). Ruff and mypy pass; the full repository suite of 254 tests passes.
 
-The formal run executes on a clean commit; after review approval, `experiments/registries/stage05.1_artifact_registry.csv` and `experiments/manifests/stage05.1_best_known_artifact_manifest.json` are published, with review status `READY_FOR_STAGE05_2`.
-
-#### 5.2 Performance governance and the scaled benchmark
-
-Stage 5.2 maintains a single continuously iterated current implementation, internally executing gates in strict order. A–G are validation steps within one implementation, not seven long-lived versions; a later step must not begin formal evidence runs before the previous step passes independent review. Each part uses its own component, with `attemptNN/rerunNN` serving only as the canonical run identity:
-
-- `stage05.2_perf_baseline_attemptNN`;
-- `stage05.2_hot_path_attemptNN`;
-- `stage05.2_artifact_streaming_attemptNN`;
-- `stage05.2_job_parallel_attemptNN`;
-- `stage05.2_native_kernels_attemptNN`;
-- `stage05.2_accelerator_pilot_attemptNN`;
-- `stage05.2_benchmark_attemptNN`.
-
-The full execution protocol is this section together with the Stage 5.2 governance rules in `AGENTS.md`. The entry point of Stage 5.2 must be the independent review status `READY_FOR_STAGE05_2` of `stage05.1_best_known_attempt06`, inheriting the Stage 4 accepted formal identity `stage04_adaptive_weights_attempt15`.
-
-The current chain is determined by signed manifests, prerequisite identities, and `experiments/registries/stage05.2_retention_registry.csv`; specific attempts are not hard-coded in this roadmap. Old runs' statuses, failure reasons, historical relations, and archive locations go into the registry and the change log; only the current accepted predecessor can open the next gate.
-
-##### 5.2-A Fixed-work performance baseline
-
-1. Fix instances `c101C5`, `c101_21`, `r101_21`, `rc101_21` and seeds `2014/2015/2016`;
-2. record both fixed-work and wall-clock axes, but all causal performance conclusions rest on fixed-work;
-3. record solver, artifact-persistence, and end-to-end times — CPU time or power draw alone must not be reported;
-4. record per-stage durations, exact-call counts, batch occupancy, operator cost, core usage, peak RSS, rows/bytes written, and compression time;
-5. fix the current `cpu_batch`, single worker, and `artifact-storage-v1` as the direct comparison baseline for every later gate.
-
-##### 5.2-B Eliminate duplicated Python hot-path work
-
-Process in profiling order: cache `Instance` name lookups, depot/customer/station grouping, and the distance matrix; fix the eager evaluation that rebuilds propagation snapshots on cache hits; the ejection chain rechecks only changed routes; the screening cache may store only provably safe, auditable positive results; give every operator a time and exact-call budget.
-
-Acceptance uses a strict performance gate: fixed-work objective, validator, exact-call ordering, candidate decisions, and cache semantics must be identical; versus 5.2-A, the overall end-to-end median runtime over all 100-customer pairs must drop by at least 15%, and no C/R/RC family median may regress by more than 3%. On failure: seal the evidence, record the root cause, and archive — never lower the gate or bypass the semantic checks.
-
-##### 5.2-C Streaming/sharded artifact storage
-
-Implement `artifact-storage-v2`: Parquet row-group streaming, sharding by `(instance, seed)`, workers writing only their own shard, and the parent writing only the control manifest. Row groups are fixed at 65,536 rows; the writer buffers at most 2 row groups; every shard has its own manifest, checksum, and completeness state. The v1 reader must remain functional; historical bytes must not be moved or rewritten.
-
-Gate: v1/v2 raw replay must agree on validator, objective, critical-event, exact-call, and failure semantics; artifact persistence must not exceed 30% of end-to-end; peak RSS must not exceed 50% of 5.2-A. Partial shards must be sealed, fail fast, and archive after checksum verification — never silently truncated or serially backfilled.
-
-##### 5.2-D Job-level parallelism
-
-The unit of parallelism is the independent `(instance, seed)` shard; the four-process intra-exact-call path already proven inefficient in Stage 3.4 is not reused. Run fixed-work comparisons with 1/2/4 workers; workers own shards exclusively, and the parent merges manifests by canonical key — completion order must not change replay order or event identity.
-
-Gate: 2 workers must reach at least a 1.5× end-to-end speedup over 1 worker with aggregate RSS at most 12 GiB; 4 workers are selected only at ≥ 2.5× and ≤ 12 GiB. If 2 workers pass but 4 do not, the formal configuration is fixed at 2; if 2 workers fail, this gate is `NOT_READY`. Any worker exception terminates that run immediately; implicit serial fallback is not allowed.
-
-##### 5.2-E Native CPU hot kernels
-
-Migrate the profiling-confirmed hotspots — screening, snapshot propagation, distance lookup, exact label expansion/dominance/heap — into C++ contiguous-array implementations, releasing the GIL in computation regions that touch no Python objects. Large-scale rewrites must not replace per-hotspot fixed-work comparisons.
-
-Gate: fixed-work semantics must be identical to the 5.2-D selected configuration; versus 5.2-D, the overall end-to-end median time over all 100-customer pairs must drop by at least another 15%, and no C/R/RC family median may regress by more than 3%.
-
-##### 5.2-F Conditional accelerator gate
-
-GPU/Metal/MPS is not a mandatory target. A new accelerator pilot run executes only when the median route batch occupancy of the current accepted native CPU backend reaches 32. The GPU pilot must separately record host-to-device, kernel, device-to-host, and synchronization times.
-
-Only when fixed-work semantics are fully identical, the overall end-to-end median time over all 100-customer pairs drops by at least 15% versus the selected native CPU, and no C/R/RC family median regresses by more than 3%, may the GPU become the formal backend. Otherwise publishing `GPU_NOT_JUSTIFIED` is a legitimate pass of this gate, and the formal benchmark continues on native CPU; no automatic CPU fallback may be kept to mask accelerator failures.
-
-##### 5.2-G Layered benchmark
-
-First run a full pipeline pilot over the fixed Stage 0 representative set (12 instances × 3 seeds), covering the formal backend, workers, streaming writer, reviewer, and summary generation. After the pilot passes, execute the pre-declared layered budget:
-
-- all 92 instances (36 small + 56 100-customer) run `10 seeds × 30 seconds`;
-- only the 56 100-customer instances additionally run `10 seeds × 60 seconds` and `10 seeds × 300 seconds`;
-- small instances do not run 60/300 seconds, to avoid wasting budget after the iteration limit;
-- anytime checkpoints are fixed at `1/5/10/30/60/120/300 seconds` within the applicable budget;
-- every failure first seals the original shard, manifest, and run label, then verifies the archive; failed samples are not shrunk, failures are not overwritten by rerun results, and large failed raw does not accumulate unboundedly in the repository worktree.
-
-##### Version and retention governance across A–G
-
-This is a governance rule spanning A–G; it does not add an eighth performance gate:
-
-1. Stage 5.2 source always has a single current implementation; later improvements modify it directly;
-2. `python -m evrptw.stage052_retention audit` generates a read-only inventory with SHA-256 sidecars;
-3. `archive` must bind the inventory hash and verify per-directory file counts, byte counts, and tree SHA-256 before migration;
-4. complete, partial, failed, `NOT_READY`, and superseded raw are all archived to `d_archive/stage05.2/history/<run_label>/`;
-5. the repository keeps only the lightweight retention registry, the change log, and the scientific summaries published by independent review;
-6. the Stage 5.2 change log — recorded in `AGENTS.md` for governance changes and per run in the retention registry for implementation changes — continuously appends modification reasons, impact scope, evidence effects, verification results, and the related run identities; it does not copy new version directories;
-7. archived runs are resolved through the registry's run label and archive alias, re-verified on file counts, byte counts, and tree SHA-256 before use as prerequisite/review inputs; tracked documents do not contain machine-local absolute paths;
-8. active/unsealed runs are denied archiving by default, and the registry merges incrementally by immutable run identity. Same-volume moves use atomic rename; cross-volume moves first copy to a temporary directory on the target volume, and only after full re-verification and atomic placement is the source directory cleaned.
-
-The BKS model-incompatibility conclusion remains in force, so no gaps may be computed or published. The formal review must publish `stage05.2_artifact_registry.csv`, `stage05.2_performance_benchmark_artifact_manifest.json`, per-run results, per-family/budget summaries, anytime curves, and resource/persistence overhead tables, and only report `READY_FOR_STAGE05_3` when all replays/gates pass.
+The formal run executes on a clean commit; after review approval, `experiments/registries/stage05.1_artifact_registry.csv` and `experiments/manifests/stage05.1_best_known_artifact_manifest.json` are published, with the stage's terminal acceptance status recorded.
 
 #### 5.3 Ablation study
 
@@ -746,7 +667,7 @@ Remove or replace separately:
 - OR-Tools initialisation;
 - cheap screening and caching.
 
-Every ablation variant must use the same instances, seeds, and time budget, plus the Stage 5.2 selected backend, workers, and artifact-storage-v2 configuration. Fixed-work is the primary axis for causal ablations and wall-clock the auxiliary axis for practical gains; only the "remove exact charging" variant calls no exact backend.
+Every ablation variant must use the same instances, seeds, and time budget, plus the selected backend, workers, and artifact-storage-v2 configuration. Fixed-work is the primary axis for causal ablations and wall-clock the auxiliary axis for practical gains; only the "remove exact charging" variant calls no exact backend.
 
 ### Required outputs
 
@@ -779,7 +700,7 @@ This stage is uniformly labeled `stage06`; pricing, state-space, branching, and 
 
 Stage 6 and ALNS acceleration are independent tracks. BPC scaling must not block Stages 3/4, and heuristic incumbents must not be misrepresented as lower bounds or optimality proofs.
 
-ESPPRC/BPC pricing itself does not execute ALNS exact charging route evaluation, so the Stage 5.2 selected ALNS backend does not apply; but Stage 6 evidence persistence inherits the `artifact-storage-v2` streaming/shard/job-parallel contract. ALNS incumbent warm starts and any component reusing ALNS route evaluation must use the Stage 5.2 selected backend and must not call `cpu_scalar`.
+ESPPRC/BPC pricing itself does not execute ALNS exact charging route evaluation, so the selected ALNS backend does not apply; but Stage 6 evidence persistence inherits the `artifact-storage-v2` streaming/shard/job-parallel contract. ALNS incumbent warm starts and any component reusing ALNS route evaluation must use the selected backend and must not call `cpu_scalar`.
 
 ### Concrete tasks
 
@@ -856,7 +777,7 @@ This stage is uniformly labeled `stage07`; solution schema, route schedule, char
 
 The solution interface and validator contract may be developed early in Stage 3's measurement track, but a full-recharge compatibility replay must complete before they serve as the Stage 8 model entry. Interface migration must not rewrite Stage 0–2 historical results.
 
-Stage 7's ALNS output conversion, full-recharge compatibility replay, and validator integration must preserve the ordered batch semantics of the Stage 5.2 selected backend and inherit the streaming/shard artifact contract; correctness checks use frozen samples and validator recomputation, without running `cpu_scalar`.
+Stage 7's ALNS output conversion, full-recharge compatibility replay, and validator integration must preserve the ordered batch semantics of the selected backend and inherit the streaming/shard artifact contract; correctness checks use frozen samples and validator recomputation, without running `cpu_scalar`.
 
 ### Concrete tasks
 
@@ -905,7 +826,7 @@ This stage is uniformly labeled `stage08`; partial linear, piecewise linear, non
 
 Stage 8 is the final model-extension stage. Partial, piecewise-linear, and nonlinear results must be reported in separate directories, configurations, and validator reports from the current full-recharge baseline; model changes must not be explained as search-algorithm gains.
 
-Any new Stage 8 charging model entering ALNS exact route evaluation must implement a compatible ordered batch interface and re-pass Stage 5.2's fixed-work semantics, strict performance, streaming/shard, and independent review gates. Models with only a scalar implementation are development prototypes only — they must not enter formal experiments, performance conclusions, or stage acceptance.
+Any new Stage 8 charging model entering ALNS exact route evaluation must implement a compatible ordered batch interface and re-pass the fixed-work semantics, strict performance, streaming/shard, and independent review gates. Models with only a scalar implementation are development prototypes only — they must not enter formal experiments, performance conclusions, or stage acceptance.
 
 ### Concrete tasks
 
@@ -920,7 +841,7 @@ Every model must:
 
 - have an independent configuration name and results directory;
 - have an independent exact subproblem or a rigorous discretisation-error statement;
-- have a compatible ordered batch interface and re-pass the Stage 5.2 backend replacement gate; formal runs must not fall back to `cpu_scalar`;
+- have a compatible ordered batch interface and re-pass the backend replacement gate; formal runs must not fall back to `cpu_scalar`;
 - not overwrite current full-recharge results;
 - match the corresponding validator formulas;
 - report model complexity, runtime, and solution-quality changes;
@@ -960,8 +881,8 @@ These tests are not executed once at the end; every stage must maintain them:
 11. small-scale smoke/replay preflight before formal experiments; formal runs use the frozen clean commit with a full hash manifest;
 12. all experiment tables are generated automatically from raw logs; failures, invalids, timeouts, and errors must not exist only in terminal output.
 13. Any new ALNS/exact-charging code, tests, and experiments after 2026-07-14, regardless of stage label, must assert that the backend is not `cpu_scalar` and must verify that error paths fail fast with no implicit fallback; the sole exception is explicitly labeled historical reproduction using the Stage 0–3.2 historical runners and frozen configurations that existed before 2026-07-14.
-14. New acceleration backends from Stage 5.2 onward must first use the currently selected backend as reference and satisfy identical fixed-work semantics; the overall end-to-end median time over all 100-customer pairs must drop by at least 15%, and no C/R/RC family median may regress by more than 3%. New scalar hotspots must return through Stage 5.2's profiling→native CPU→conditional accelerator gates; bypassing them is forbidden.
-15. From Stage 5.2 onward, solver time, artifact persistence time, and end-to-end time must be reported separately; CPU utilisation, chip power draw, or kernel time alone cannot support a speedup conclusion.
+14. New acceleration backends must first use the currently selected backend as reference and satisfy identical fixed-work semantics; the overall end-to-end median time over all 100-customer pairs must drop by at least 15%, and no C/R/RC family median may regress by more than 3%. New scalar hotspots must return through the profiling→native CPU→conditional accelerator gates; bypassing them is forbidden.
+15. Solver time, artifact persistence time, and end-to-end time must be reported separately; CPU utilisation, chip power draw, or kernel time alone cannot support a speedup conclusion.
 
 If any stage regresses feasibility, validation correctness, or reproducibility, fix the root cause first, then continue extending.
 

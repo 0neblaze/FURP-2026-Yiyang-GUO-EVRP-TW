@@ -122,7 +122,7 @@ secrets.*
 # AI assistant workspace (local session memory and poster-build scratch)
 /.workbuddy/
 
-# Machine-specific Stage 5.2 storage roots
+# Machine-specific runtime storage roots (local files, never committed)
 /configs/stage052_storage_roots.local.toml
 /configs/stage052_runtime_identity.local.json
 

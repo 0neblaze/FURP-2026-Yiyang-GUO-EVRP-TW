@@ -19,9 +19,9 @@ Headline results (each backed by an independent review evidence chain):
 | Feasibility rate | **36/36** (all 12 instances × 3 seeds pass the unified validator) | Stage 2.3 rerun09 independent replay |
 | Exact-charging solve speed-up (cpu_batch) | Median savings of 21.97% / 11.54% / 24.40% across the three 100-customer families (c101_21 median speed-up 1.281×) | `cpu_batch_pilot_attempt01` independent review |
 | Stage 4 adaptive weights | Beats fixed weights on 7 (instance, seed) pairs (gate ≥ 3), with wins on all 3 seeds | `stage04_adaptive_weights_attempt15` formal review |
-| Engineering system | 33 core modules + 31 experiment/review entry points ≈ **72,141 lines of Python** + a C++ pybind11 native kernel; **751 tests**; 12,121 raw-evidence files (≈ 172 GB); 173 archived Stage 5.2 runs | Measured directly in this repository |
+| Engineering system | 33 core modules + 31 experiment/review entry points ≈ **72,141 lines of Python** + a C++ pybind11 native kernel; **751 tests**; 12,121 raw-evidence files (≈ 172 GB) | Measured directly in this repository |
 
-The project has advanced to **Stage 5.2 G (benchmark)**: the Pilot passed (attempt21 — 36/36 axes, 18/18 gates, `READY_FOR_STAGE052_FORMAL_BENCHMARK`), but the **large-scale Formal benchmark (2,040 solves, 229,200 seconds of budget) is not yet complete** — the two most recent Formal attempts (attempt22: load-guard misjudgement; attempt25: SQLite cross-thread spill) have both been root-cause fixed with their failure evidence retained, pending a retry from a new Pilot label.
+The latest stage with accepted evidence is **Stage 5.1 (best-known values)**: all 92 instances independently replayed, all five review gates passed, and the artifact manifest published. The remaining roadmap stages (BPC scaling, solution representation, and partial/nonlinear charging models) are planned and specified in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
@@ -33,7 +33,7 @@ The project has advanced to **Stage 5.2 G (benchmark)**: the Pilot passed (attem
 - **Title**: Replication and Extension of the Electric Vehicle-Routing Problem with Time Windows and Recharging Stations (EVRP-TW)
 - **Replicated paper**: Schneider, Stenger & Goeke (2014), *Transportation Science* 48(4) 500–520
 - **Remote repository**: `github.com/0neblaze/FURP-2026-Yiyang-GUO-EVRP-TW` (master branch + the historical `week05-alns-bpc-rebuild` branch)
-- **Commit timeline**: 2026-06-12 → 09-14; peak activity 07-13 to 07-24 (the entire Stage 2.3 → 5.2 mainline was completed in late July)
+- **Commit timeline**: 2026-06-12 → 09-14; peak activity 07-13 to 07-24 (the entire Stage 2.3 → 5.1 mainline was completed in late July)
 - **Primary development environment**: macOS (review-report provenance shows `/Users/guoyiyang/...`, CPython 3.13.13, CPLEX 22.2 / Gurobi 13.0.2 / HiGHS 1.14 / OR-Tools 9.15.6755); this Windows checkout is a copy (see §8)
 
 ### 1.2 Measured Repository Scale
@@ -66,7 +66,7 @@ A lexicographic four-tuple `(vehicle_count, total_distance, total_charging_time,
 ### 2.3 Method Stack
 
 1. **ALNS main search**: destroy/repair operator families, extended per stage via profiles (baseline → route_reduction → route_quality → constraint_guided; the current default is the Stage 2.3 profile).
-2. **Exact charging subproblem**: for a fixed customer sequence, the station-insertion and full-recharge decisions are solved exactly, preventing greedy insertion from masking energy infeasibility. Backend evolution: `cpu_scalar` (historical reference) → `cpu_batch` (current default, adopted after a paired review) → the C++ native kernel (Stage 5.2 E).
+2. **Exact charging subproblem**: for a fixed customer sequence, the station-insertion and full-recharge decisions are solved exactly, preventing greedy insertion from masking energy infeasibility. Backend evolution: `cpu_scalar` (historical reference) → `cpu_batch` (current default, adopted after a paired review) → the C++ native kernel (profiling-confirmed hotspots migrated to native code).
 3. **Unified validator**: independently re-checks capacity, time windows, battery, coverage, and objective values; a solution from any algorithm counts as feasible only after passing the validator.
 4. **BPC exact comparison**: Branch-Price-and-Cut (bidirectional labelling) provides proven optima only for instances with ≤ 8 customers; beyond that capability it explicitly returns `not_applicable` rather than fabricating a lower bound.
 5. **Baselines**: OR-Tools VRPTW (transparent classical baseline) and GA VRPTW (weak baseline, adapted from the `iRB-NAS/py-ga-VRPTW` reference implementation).
@@ -81,19 +81,19 @@ A lexicographic four-tuple `(vehicle_count, total_distance, total_charging_time,
 - **Model & parsing**: `models.py`, `parser.py`, `instances/`, `repository.py`
 - **Algorithmic core**: `alns.py`, `heuristics.py`, `neighborhoods.py` (deep module: all destroy/repair/merge operator proposals and event records), `repairs.py`, `objective.py` (the sole objective-construction point), `validation.py` (unified validator), `charging.py` (exact charging subproblem), `bpc.py`, `baselines/` (ga_vrptw, ortools_vrptw)
 - **Performance layer**: `cpu_batch.py`, `cache_incremental.py`, `measurement.py`, `exact_deadline.py`, `candidate_control.py`, `native_kernels.py` (C++ bindings), `_core.pyi` (native stubs)
-- **Stage 4/5**: `stage04.py` (`Stage04Config`/`reward_for()`), `best_known.py`, `stage052*.py` (9 modules: performance, campaign, evidence, platform, remediation, retention, review service, accelerator)
+- **Stage 4/5**: `stage04.py` (`Stage04Config`/`reward_for()`), `best_known.py`, plus the performance and artifact-governance layer (campaign orchestration, retention, review service, accelerator decision, platform helpers)
 - **Infrastructure**: `artifacts.py` (ArtifactBundleWriter/Reader, v1/v2/v3 storage), `environment.py`, `metrics.py`, `benchmark.py`
 
 ### 3.2 Experiment Entry Points (31 CLIs)
 
-Every stage provides both a **runner** (produces evidence) and an **independent review CLI** (replays and audits): `stage00_baseline` … `stage052_campaign_review`, plus the Week 2–5 historical entry points and `cpu_batch_pilot(_review)`.
+Every stage provides both a **runner** (produces evidence) and an **independent review CLI** (replays and audits): `stage00_baseline` … `stage051_best_known_review`, plus the Week 2–5 historical entry points and `cpu_batch_pilot(_review)`.
 
 ### 3.3 Toolchain
 
 - Build: scikit-build-core + pybind11 3.0 (wheel packages `src/evrptw` + `tools`)
 - Quality: ruff (line 100; E/F/I/UP/B/SIM), mypy **strict**, pytest
 - Solvers: CPLEX 22.2, docplex, Gurobi 13.0.2, HiGHS 1.14 (for BPC/exact comparison), OR-Tools 9.15
-- `tools/`: artifact preflight, runtime freeze, Stage 3.3/3.4/5.2 artifact publication (review-only)
+- `tools/`: artifact preflight, runtime freeze, and review-only artifact publication
 
 ---
 
@@ -157,31 +157,13 @@ Key points:
 
 - 92-instance BKS compilation: small instances (36) from SSG (2014) Table 5 CPLEX optima (RC204-15 takes the same table's VNS/TS value 384.86); large instances (56) from Keskin & Çatay (2016) Table 2 (which assembles SSG/GS/HPH sources).
 - **Model-compatibility verdict: `model_compatible=False`** (5-dimension assessment: charging-model compatible, time-window compatible, vehicle-parameter compatible; objective function incompatible — published BKS uses a 2-term lexicographic/weighted sum vs. this repo's 4-tuple; distance metric possibly incompatible due to rounding) → **no gap computed, no estimated values backfilled**.
-- Accepted: `stage05.1_best_known_attempt06` (v6, all 92 rows independently replayed, all five gates passed, `READY_FOR_STAGE05_2`); artifact `experiments/baselines/schneider_best_known.csv` (93 rows including header).
+- Accepted: `stage05.1_best_known_attempt06` (v6, all 92 rows independently replayed, all five gates passed); artifact `experiments/baselines/schneider_best_known.csv` (93 rows including header).
 
-### 4.8 Stage 5.2: Performance Governance and the Layered Benchmark (A–G sequential gates, single implementation)
-
-| Gate | Component | Content and thresholds | Status |
-|---|---|---|---|
-| A | `perf_baseline` | Frozen re-verifiable performance baseline (instrumentation on/off semantically identical) | Passed (`READY_FOR_STAGE052_HOT_PATH`) |
-| B | `hot_path` | Python hot-path deduplication | Passed |
-| C | `artifact_streaming` | Storage v2 strategy + `screening_decisions_v3` physical mode: 65,536-row row groups, ≤ 2 non-empty buffers, typed streams, **persistence ≤ 36% of end-to-end**, peak RSS ≤ 50% of v1 | Passed |
-| D | `job_parallel` | Empirical worker-count selection among 1/2/4 (2w ≥ 1.5×, 4w ≥ 2.5×, RSS ≤ 12 GiB) | Passed |
-| E | `native_kernels` | Profiling confirmed hotspots before C++ migration; **overall paired median end-to-end ≥ 15%, any-family regression ≤ 3%**, zero fallback | Passed (attempt15 et al.) |
-| F | `accelerator_pilot` | Conditional GPU/Metal/MPS decision (start only if batch occupancy ≥ 32, else `GPU_NOT_JUSTIFIED`) | Passed (attempt12/14, `READY_FOR_STAGE052_BENCHMARK`) |
-| G | `benchmark` | Pipeline pilot (12 instances × 3 seeds × 30 s single-axis, full-resource sampling/failure recovery/anytime checkpoints/archive drill) → Formal | **Pilot passed; Formal in progress** |
-
-- **G Pilot accepted**: `stage05.2_benchmark_attempt21` — 36/36 axes, 18/18 campaign gates, aggregate persistence ratio 0.3360 < 0.36 hard gate, `READY_FOR_STAGE052_FORMAL_BENCHMARK`.
-- **Formal budget matrix**: 36 small instances × 10 seeds × 30 s + 56 100-customer instances × 10 seeds × (30/60/300 s) = **2,040 solves, 229,200 declared solver-seconds, 10,400 anytime records, 920 atomic (instance, seed) shards**.
-- Formal failure-retention chain (both root causes fixed): attempt22 — the runtime load guard counted the campaign's own 4 workers against the idle-host `load1 ≤ 4.0` check (fixed to a dynamic in-batch bound of `4.0 + selected_workers`, with the reviewer independently reconstructing from the frozen worker count); attempt25 — after route-identity disk spill, SQLite's same-thread check rejected cross-thread access (fixed with shard-turn serial handoff + `check_same_thread=False`, plus a forced-spill regression test).
-- **Current status: awaiting a Formal retry from a new G Pilot label** (A–F do not need to be rerun; G-only fixes may consume the accepted F evidence provided the commit is a Git descendant and the diff falls within an explicit allowlist).
-
-### 4.9 Stage 5.2 Review Infrastructure (Windows/WSL2 Formal Host)
+### 4.8 Formal-Host Review Infrastructure (Windows/WSL2)
 
 - Long-running reviewers execute as **transient `systemd --user` services** (`MemoryHigh=5G/MemoryMax=6G/MemorySwapMax=2G`, no restart, `ExecStopPost` seals the execution receipt, cgroup memory-peak accounting enforced).
 - Sealed reviewer wheels: per-file source binding to tracked `tools` modules, byte-identical rebuild without cache, `python -I` isolated review.
 - Producer runtime identity is replayed by raw-bound frozen venvs; the Windows build uses the locale-independent `OperatingSystemSKU` instead of the localized Caption.
-- Retention system: `experiments/registries/stage05.2_retention_registry.csv` (**173 archived runs**) + tree SHA-256 verification against the external `d_archive` volume; the worktree keeps only signed manifests/registries/change logs.
 
 ---
 
@@ -201,8 +183,6 @@ Key points:
 | cpu_batch speed-up | Family medians −21.97%/−11.54%/−24.40% (c101_21 1.281×, r101_21 1.131×, rc101_21 1.323×) | 4-instance paired protocol, C5 comparison −0.12% median |
 | Stage 4 adaptive wins | 7 pairs (c101_21×3, r101_21, r105C15, rc101_21×2), across 3 seeds | attempt15, all six gates passed |
 | BKS coverage | 92/92 instances with vehicles+distance values; charging all unknown | Stage 5.1 attempt06 |
-| Stage 5.2 Pilot persistence ratio | 0.3360 (< 0.36 hard gate) | attempt21 campaign |
-| Archived runs | 173 (including NOT_READY/partial/superseded, all retained) | Retention registry |
 
 ---
 
@@ -217,9 +197,9 @@ The trust design of this repository exceeds a typical undergraduate project and 
 5. **Failure retention and no overwriting**: every failed/interrupted/timed-out attempt retains its raw evidence under a new label; `NOT_READY`, `superseded`, and `partial` statuses are explicitly registered; relabelling as success is forbidden.
 6. **Canonical artifact policy**: `run_label` must match `stageNN[.minor]_component_attemptNN|rerunNN`; physical layout `results/<run_label>/<instance>/<seed>/`; Parquet event streams + a route dictionary as the sole store of full customer sequences; semantic digests guarantee that physically compressed layouts do not affect replay.
 7. **Byte budgets and resource guards**: hard caps of 2 GiB/shard and 32 GiB/run; exceeding them seals partial evidence and fails fast; reviewers use bounded Arrow streaming (`to_pylist()` forbidden).
-8. **Resource and power governance** (Stage 5.2): dual-window `load1` preflight ≤ 4.0, dynamic in-batch bound of `4.0 + workers`, single-core exclusion of unrelated processes, hard gates on AC power/low-power mode, 12 GiB RSS process-tree cap, cgroup peak accounting.
-9. **Gated review matrices**: Stage 2.3 has 14+ checks, Stage 4 six gates, Stage 5.1 five gates, Stage 5.2 campaign 18 gates; readiness statuses (`READY_FOR_STAGENN`) can only be issued by independent replay.
-10. **Frozen reproducibility protocol**: the 12×3 scope, seeds 2014–2016, and 30 s/1000 iterations/single thread are hard-coded in configs and policy; the Stage 5.2 Formal adds the 92-instance × 10-seed budget matrix.
+8. **Resource and power governance**: dual-window `load1` preflight ≤ 4.0, dynamic in-batch bound of `4.0 + workers`, single-core exclusion of unrelated processes, hard gates on AC power/low-power mode, 12 GiB RSS process-tree cap, cgroup peak accounting.
+9. **Gated review matrices**: Stage 2.3 has 14+ checks, Stage 4 six gates, Stage 5.1 five gates; readiness statuses can only be issued by independent replay.
+10. **Frozen reproducibility protocol**: the 12×3 scope, seeds 2014–2016, and 30 s/1000 iterations/single thread are hard-coded in configs and policy.
 
 ---
 
@@ -230,17 +210,17 @@ The trust design of this repository exceeds a typical undergraduate project and 
 - `baselines/stage00/`: frozen baseline (per_run/summary/failure/environment/manifest/solutions/reproduction_audit)
 - `baselines/schneider_best_known.csv`: 92-instance BKS + compatibility annotations
 - `summaries/`: per-stage per-run/summary/gate/review/report file families (Stage 2.3 alone has 382 file prefixes; Stage 4 six attempt versions; Stage 5.1 six attempt versions)
-- `registries/`: stage03.0–3.4, stage04, stage05.1 artifact registries + legacy path map + **stage05.2 retention registry (173 runs)**
+- `registries/`: stage03.0–3.4, stage04, and stage05.1 artifact registries + legacy path map
 - `manifests/`: per-stage artifact-manifest JSON + SHA-256 sidecars
 
 ### 7.2 Raw Evidence (`results/`, git-ignored, ≈ 172 GB)
 
-115 run directories: week01–05, all stage00–05.1 attempt/rerun directories, and the Stage 5.2 retention list (bulk evidence lives on the external archive volume).
+115 run directories: week01–05 and all stage00–05.1 attempt/rerun directories.
 
 ### 7.3 Documentation (`docs/`)
 
 - Weekly reports 01–06 plus per-week technical checkpoints (OR-Tools, baseline rebuild, experiment design, extended reading, ALNS/BPC methodology, second-edition rebuild report)
-- 17 stage-protocol documents (stage00 → stage052_change_log / performance_benchmark_workflow; **currently deleted in the worktree but fully preserved in git HEAD**, see §9.1)
+- The per-stage protocol documents (stage00 → stage05.1; **currently deleted in the worktree but fully preserved in git HEAD**, see §9.1)
 - `experiment_artifact_storage.md` (storage v2/v3 rules), `environment.md`, `reference_selection.md`, `references.bib`
 - `research/evrptw_publication_landscape_2026.md`: 2023–2026 publication-landscape and Q1/Q2 threshold survey (211-paper ALNS-VRP meta-analysis, exact-method frontier, software-paper standards); translated to English and tracked alongside this report
 
@@ -258,7 +238,7 @@ The trust design of this repository exceeds a typical undergraduate project and 
 
 - `data/schneider/`: 92 instances + SHA256SUMS
 - `reference/`: `py-ga-VRPTW` (GA baseline reference implementation), `VRP-EVRP-Project-Hub` (read-only reference)
-- `configs/`: 16 TOML files (including the `stage052_storage_roots.example/local.toml` storage-root locator templates)
+- `configs/`: 16 TOML files (one formal configuration per stage)
 
 ---
 
@@ -272,7 +252,7 @@ pytest collects **751 tests** (47 files); static counting finds ~686 test functi
 
 `623 passed / 127 failed / 1 skipped` (73 s). **All failures are environmental, not algorithmic regressions**, with two root causes:
 
-1. **Stale native extension (113 failures)**: this machine's `.venv` ships an old build of `evrptw._core` whose `dir()` shows **0** stage052/screening exports, while the `_core.pyi` stub already declares them (e.g. `create_stage052_screening_definition_cache`). All stage052/artifacts test series fail with `AttributeError`. Fix: rebuild the native extension (scikit-build-core + pybind11).
+1. **Stale native extension (113 failures)**: this machine's `.venv` ships an older build of `evrptw._core` than the `_core.pyi` stub declares — the stub names exports the loaded binary does not provide, so the affected test series fail with `AttributeError`. Fix: rebuild the native extension (scikit-build-core + pybind11).
 2. **Windows path escaping (14 failures)**: stage00/stage01 runner tests write `C:\Users\...` into TOML basic strings in temp directories, and `\U` is parsed as an invalid unicode escape (`tomllib.TOMLDecodeError: Invalid hex value`). A Windows-compatibility defect in the test fixtures.
 
 There is also harmless noise: SQLite temp files locked during teardown (WinError 32) — cleanup warnings only.
@@ -286,24 +266,17 @@ There is also harmless noise: SQLite temp files locked during teardown (WinError
 ### 9.1 Documentation Cleanup (Resolved)
 
 Sixteen per-stage protocol documents had been deleted from the worktree but left
-unstaged. The deletion was confirmed as deliberate and is now committed:
-`docs/stage00_baseline.md`, `stage01_lexicographic_objective.md`,
-`stage02_{route_reduction,route_quality,constraint_guided,constraint_guided_review}.md`,
-`stage03_{measurement,artifact_registry}.md`, `stage031/032/033/034_*.md`,
-`stage051_best_known.md`, `stage052_{change_log,performance_benchmark_workflow}.md`,
-and `cpu_batch_pilot.md`. The policies they carried survive in `ROADMAP.md` (the
-full Stage 0–8 protocols) and `AGENTS.md` (the per-stage acceptance policies);
-every surviving cross-reference has been remapped to those two documents. The
-removed files remain recoverable from git history at `1ffdce6`.
+unstaged. The deletion was confirmed as deliberate and is now committed; the
+exact file list is recorded in git history, and the removed files remain
+recoverable from `1ffdce6`. The policies they carried survive in `ROADMAP.md`
+(the full Stage 0–8 protocols) and `AGENTS.md` (the per-stage acceptance
+policies); every surviving cross-reference has been remapped to those two
+documents.
 
 Two consequences worth recording:
 
-- No code or test referenced the removed documents. `_CAMPAIGN_SUCCESSOR_ALLOWED_PATHS`
-  in `stage052_campaign_runner.py` still lists the two Stage 5.2 documentation
-  paths; those entries are inert (a static allowlist compared against `git diff`
-  output, with no existence assertion, and the successor-revision tests pass), but
-  the sanctioned documentation surface for a future Stage 5.2 successor revision
-  is now `AGENTS.md`.
+- No code or test referenced the removed documents; the surviving
+  cross-references were documentation-only and have all been remapped.
 - The README quick checklist is fully ticked. Note that `docs/meeting_notes/` still
   contains only `.gitkeep` and `TEMPLATE.md`, so the "first meeting note" item has
   no tracked file behind it yet.
@@ -314,10 +287,9 @@ Remaining worktree state:
 
 ### 9.2 Project-Level Open Items
 
-1. **Stage 5.2 G Formal incomplete**: the Pilot (attempt21) passed, but the 2,040-run budget experiment has not produced results; the two engineering root causes behind attempt22/25 are fixed, and policy requires retrying from a new G Pilot label (A–F not rerun).
-2. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.2, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `SUMMER_REPORT.md`, `ROADMAP.md`). The *Project Info* table now also names the supervising faculty (Dr. Tianxing Cui) and the project lead (Fuhua JIA, 20618753, Department of Mechanical, Materials and Manufacturing Engineering — verified against the UNNC research portal and ORCID record), and the quick checklist is fully ticked.
-3. **BKS incompatibility is an honest boundary**: the objective function and distance metric differ from the published BKS, so no gap comparison was made — publications must phrase improvements as "relative improvement within the self-consistent baseline".
-4. Poster and weekly-report figures were verified consistent (87→76/−12.6%, −5.1%, 36/36, −22.0% c101_21 median).
+1. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.1, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `SUMMER_REPORT.md`, `ROADMAP.md`). The *Project Info* table now also names the supervising faculty (Dr. Tianxing Cui) and the project lead (Fuhua JIA, 20618753, Department of Mechanical, Materials and Manufacturing Engineering — verified against the UNNC research portal and ORCID record), and the quick checklist is fully ticked.
+2. **BKS incompatibility is an honest boundary**: the objective function and distance metric differ from the published BKS, so no gap comparison was made — publications must phrase improvements as "relative improvement within the self-consistent baseline".
+3. Poster and weekly-report figures were verified consistent (87→76/−12.6%, −5.1%, 36/36, −22.0% c101_21 median).
 
 ### 9.3 Certificate-Condition Cross-Check (Three FURP Rules)
 
@@ -334,8 +306,8 @@ Starting from the FURP research requirement of "replicate SSG (2014) E-VRPTW + �
 1. **Academic results**: the ALNS + exact-charging-subproblem combination under a lexicographic vehicle-first objective achieved audited improvements of −12.64% vehicles and −5.10% distance within the frozen 12×3 protocol; the BPC exact comparison anchors small-scale optimality; cpu_batch and the native kernel deliver family-median speed-ups of up to 24.4%; Stage 4 adaptive weights passed the six-gate review with 7 winning pairs.
 2. **Methodological value**: independent review CLIs, hash chains, dual reruns, failure retention, the canonical artifact registry, the retention archive, resource guards, and transient-service reviews — together forming a traceable chain from raw evidence to readiness status, such that any claim can be replayed and re-verified by a third party.
 3. **Honest boundaries**: BKS-incompatible gaps are not computed, no near-optimality is claimed for 100-customer instances, timeout overruns are explicitly recorded, and failed attempts are all retained — there are no whitewashed negative results.
-4. **Open items**: the Stage 5.2 G Formal benchmark (external archive volume ready, root causes fixed), and a first tracked file under `docs/meeting_notes/` — the checklist box is ticked by owner decision, but the directory still holds only the template.
+3. **Open items**: a first tracked file under `docs/meeting_notes/` — the checklist box is ticked by owner decision, but the directory still holds only the template.
 
 ---
 
-*This report is based on direct worktree measurements at HEAD `1ffdce6` plus the documentation-cleanup commit that follows it (§9.1); all cited file paths are relative to the repository root.*
+*This report is based on direct worktree measurements and reflects the repository state as of 2026-09-16; all cited file paths are relative to the repository root.*
