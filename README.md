@@ -41,7 +41,7 @@ This is your project home for the FURP programme. **Fork this template**, rename
 ### Headline results (independently audited)
 
 All numbers below come from the frozen 12-instance × 3-seed protocol and were
-re-verified by the independent review CLIs (full audit in [`report.md`](report.md)):
+re-verified by the independent review CLIs (full audit in [`SUMMER_REPORT.md`](SUMMER_REPORT.md)):
 
 | Result | Value | Evidence chain |
 |---|---|---|
@@ -54,7 +54,7 @@ re-verified by the independent review CLIs (full audit in [`report.md`](report.m
 
 ### Key documents
 
-- [`report.md`](report.md) — complete English audit report: results, verification system, materials, test state, and open items.
+- [`SUMMER_REPORT.md`](SUMMER_REPORT.md) — the summer research report: results, verification system, materials, test state, and open items.
 - [`ROADMAP.md`](ROADMAP.md) — staged baseline improvement roadmap (Stages 0–8), including the mandatory artifact-naming and evidence-layering policy.
 - [`AGENTS.md`](AGENTS.md) — formal objective policy, per-stage acceptance policies, and canonical artifact registry rules for this repository.
 - [`FURP_Showcase.pdf`](FURP_Showcase.pdf) — the final showcase poster (v2); the editable source is [`poster.pptx`](poster.pptx) and the rebuild engineering lives in [`poster/`](poster/).
@@ -401,7 +401,7 @@ the initial skeleton as follows:
 /document/literature/    ← 6 verified VOR journal PDFs (git-ignored)
 FURP_Showcase.pdf        ← final showcase poster (v2), in the repo root
 poster.pptx              ← final poster source
-report.md                ← complete repository audit report
+SUMMER_REPORT.md         ← summer research report
 ROADMAP.md               ← staged improvement roadmap (Stages 0–8)
 AGENTS.md                ← objective policy and per-stage acceptance rules
 ```

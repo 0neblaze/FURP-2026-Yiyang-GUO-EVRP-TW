@@ -1,4 +1,4 @@
-# FURP-2026 EVRP-TW — Complete Repository Report
+# FURP-2026 EVRP-TW — Summer Research Report
 
 > Report date: 2026-09-16
 > Scope: the entire `FURP-2026-Yiyang-GUO-EVRP-TW` repository — code, experiment artifacts, verification system, documentation, and showcase materials
@@ -315,7 +315,7 @@ Remaining worktree state:
 ### 9.2 Project-Level Open Items
 
 1. **Stage 5.2 G Formal incomplete**: the Pilot (attempt21) passed, but the 2,040-run budget experiment has not produced results; the two engineering root causes behind attempt22/25 are fixed, and policy requires retrying from a new G Pilot label (A–F not rerun).
-2. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.2, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `report.md`, `ROADMAP.md`). The *Project Info* table now also names the supervising faculty (Dr. Tianxing Cui) and the project lead (Fuhua JIA, 20618753, Department of Mechanical, Materials and Manufacturing Engineering — verified against the UNNC research portal and ORCID record), and the quick checklist is fully ticked.
+2. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.2, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `SUMMER_REPORT.md`, `ROADMAP.md`). The *Project Info* table now also names the supervising faculty (Dr. Tianxing Cui) and the project lead (Fuhua JIA, 20618753, Department of Mechanical, Materials and Manufacturing Engineering — verified against the UNNC research portal and ORCID record), and the quick checklist is fully ticked.
 3. **BKS incompatibility is an honest boundary**: the objective function and distance metric differ from the published BKS, so no gap comparison was made — publications must phrase improvements as "relative improvement within the self-consistent baseline".
 4. Poster and weekly-report figures were verified consistent (87→76/−12.6%, −5.1%, 36/36, −22.0% c101_21 median).
 
