@@ -119,6 +119,9 @@ secrets.*
 /scratch/
 /tmp/
 
+# AI assistant workspace (local session memory and poster-build scratch)
+/.workbuddy/
+
 # Machine-specific Stage 5.2 storage roots
 /configs/stage052_storage_roots.local.toml
 /configs/stage052_runtime_identity.local.json
