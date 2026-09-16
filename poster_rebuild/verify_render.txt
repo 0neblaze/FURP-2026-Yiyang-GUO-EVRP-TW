@@ -1,0 +1,85 @@
+                                                                                                   12.6% Fewer Vehicles, Zero Regressions:
+                                                                                                An Audit-First ALNS for Electric-Vehicle Routing
+                                                                                                              Yiyang Guo | Department of Mathematical Sciences
+
+
+
+                       Motivation                                                                                                                        Method Overview
+                E-VRPTW: battery-limited EVs, hard time
+                windows                                                                                                                                                                                                         KEY MECHANISMS
+
+                                                                                                                                                                                                                                •Vehicle-count-aware repair: eliminate routes
+                Fleet size first in the lexicographic objective                                                                                                                                                                 first; fleet can fall, never rise
+                                                                                                                                                                                                                                •Optimistic prefilters (capacity ·time ·energy)
+                                                                                                                                                                                                                                screen before exact evaluation
+                                                                                                                                                                                                                                •Constraint-guided destroy: station pressure, TW
+                Feasibility hinges on exact charging
+                                                                                                                                                                                                                                conflicts, energy detours
+                decisions
+                                                                                                                                                                                                                                •Exact charging subproblems re-solve only the
+                                                                                                                                                                                                                                routes that changed
+
+
+
+
+                                                                                                                                                                                                                                AUDIT PROTOCOL
+
+                                                                                                                                                                                                                                •Lexicographic objective — vehicles first;
+                                                                                                                                                                                                                                acceptance rejects any fleet-size increase
+                                                                                                                                                                                                                                •Independent review CLI replays solutions, event
+                                                                                                                                                                                                                                logs & hashes before publication
+
+
+
+
+ Objective — reproduce SSG (2014), then cut fleet size
+ with zero regressions                                                                             Constraint-guided ALNS engine — vehicle-first search with exact charging subproblems
+
+
+
+
+                 Experimental Settings                                                                                                                                              Key Results
+                                                                                   Instances
+                                                                                   12
+                                                                                   Seeds
+                                                                                   3
+                                                                                   Time limit
+                                                                                   30 s
+                                                                                   Iterations
+                                                                                   1,000
+                                                                                   Thread
+                                                                                   1
+
+
+ Stage 0 frozen & hash-verified — every number replays from raw evidence                                          Vehicle-first search cuts fleet on 5/12 instances — 87 → 76 vehicles, −5.1% distance, 36/36 feasible
+
+
+
+
+         Key Quantitative Highlights                                                                                                               Why It Works & Honest Audit
+                                                                                                                  ✓Stage-gated pipeline — gates + two independent complete reruns before any stage advances
+                                                                                                                  ✓Adaptive operator weights win 7/36 runs — observable lane only, default stays fixed
+                                                                                                                  ✓Every claim anchored to the frozen, hash-verified SSG (2014) reproduction
+                                                                                                                  ▲92/124 published BKS entries are model-incompatible — no gaps claimed against them
+                                                                                                                  ▲C5 control: −0.12% median (−8.7%…+4.5%) — speedup is structure-dependent
+                                                                                                                  ▲No unattested baselines — every number replays from raw JSON + event logs
+
+
+
+                                                                                                                                                                                                                                                                Scan for code & evidence
+                                                                                                                  [1] Schneider, Stenger & Goeke (2014) Transp. Sci. 48(4):500–520 [2] Pisinger & Ropke (2006) Transp. Res. B
+                                                                                                                  [3] Keskin & Çatay (2016) Transp. Res. E [4] Hottung, Kwon & Tierney (2022) EJOR
+
+
+
+
+ −22.0% exact-charging CPU (median, C instances) — CPU-batch default after audit
+
+
+
+
+                −5.1% total distance                                                              36/36 feasible formal runs                                                                                       −22.0% exact-charging CPU
+
+Department of Mathematical Sciences                                                                                                                                                                                    Yiyang Guo (Student ID: 20719106)
+                                                                                                                                                                                                                                 Supervisor: Tianxing Cui
+
