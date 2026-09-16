@@ -31,12 +31,33 @@ This is your project home for the FURP programme. **Fork this template**, rename
 | Project title | Replication and Extension of the Electric Vehicle-Routing Problem with Time Windows and Recharging Stations |
 | Project tag | EVRP-TW |
 | Track | Research |
-| Supervising faculty | To be confirmed |
+| Supervising faculty | Dr. Tianxing Cui (Department of Mathematical Sciences) |
 | Project lead | To be confirmed |
 | Team or individual | Individual |
 | Cited paper being replicated | Michael Schneider, Andreas Stenger, and Dominik Goeke (2014), [The Electric Vehicle-Routing Problem with Time Windows and Recharging Stations](https://doi.org/10.1287/trsc.2013.0490), *Transportation Science*, 48(4), 500-520. DOI: `10.1287/trsc.2013.0490` |
 
 **One-line summary:** This project reproduces the core modelling and computational workflow for Schneider, Stenger, and Goeke's E-VRPTW study, then evaluates practical extensions around route feasibility, charging-station insertion, and reproducible open-source baselines.
+
+### Headline results (independently audited)
+
+All numbers below come from the frozen 12-instance × 3-seed protocol and were
+re-verified by the independent review CLIs (full audit in [`report.md`](report.md)):
+
+| Result | Value | Evidence chain |
+|---|---|---|
+| Fleet size (best-sum over 12 instances) | **87 → 76 vehicles (−12.64%)** | Stage 0 frozen baseline vs. Stage 2.1 accepted |
+| Total distance (best-vehicle runs) | 7,744.4 → 7,349.4 (**−5.10%**) | Same |
+| Feasibility | **36/36** runs pass the unified validator | Stage 2.3 rerun09 independent replay |
+| Exact-charging speed-up (`cpu_batch`) | family medians −21.97% / −11.54% / −24.40% on the three 100-customer families | `cpu_batch_pilot_attempt01` paired review |
+| Stage 4 adaptive weights | beats fixed weights on 7 (instance, seed) pairs, wins on all 3 seeds | `stage04_adaptive_weights_attempt15` formal review |
+| Engineering system | ≈ 72,141 lines of Python + C++ pybind11 kernel; 751 tests; 12,121 raw-evidence files (≈ 172 GB, git-ignored); 173 archived Stage 5.2 runs | repository measurements |
+
+### Key documents
+
+- [`report.md`](report.md) — complete English audit report: results, verification system, materials, test state, and open items.
+- [`ROADMAP.md`](ROADMAP.md) — staged baseline improvement roadmap (Stages 0–8), including the mandatory artifact-naming and evidence-layering policy.
+- [`AGENTS.md`](AGENTS.md) — formal objective policy, per-stage acceptance policies, and canonical artifact registry rules for this repository.
+- [`FURP_Showcase.pdf`](FURP_Showcase.pdf) — the final showcase poster (v2); the editable source is [`poster.pptx`](poster.pptx) and the rebuild engineering lives in [`poster/`](poster/).
 
 ### Replication paper resources
 
@@ -192,7 +213,7 @@ uv run mypy
 uv run python -m evrptw.experiments.stage02_route_reduction \
   --config configs/stage02_route_reduction.toml
 
-# 第二次独立完整复跑
+# Second independent complete rerun
 uv run python -m evrptw.experiments.stage02_route_reduction \
   --config configs/stage02_route_reduction.toml \
   --output-dir results/stage02-rerun01 \
@@ -271,19 +292,120 @@ review is `READY_FOR_STAGE03`. Attempts 08, 09, and 10 retain their objective or
 operator-coverage failures, and all earlier failed or superseded rounds remain preserved
 under distinct attempt and rerun labels.
 
+### Stage 3.0–3.4 performance engineering
+
+Stage 3 attacks the bottleneck quantified in Stage 2.3 (100-customer runs made
+~1.75k–2.13k exact charging calls per 30 seconds but only ~22–52 effective
+iterations) through five reviewed sub-stages, each with its own runner and
+independent review CLI:
+
+| Sub-stage | Component | Accepted evidence | Review status |
+|---|---|---|---|
+| 3.0 | measurement instrumentation | `stage03_measurement_formal01` | `READY_FOR_STAGE03_ACCELERATION` |
+| 3.1 | cheap screening | `stage031_cheap_screening_formal01` | `READY_FOR_STAGE03_2` |
+| 3.2 | cache / incremental propagation | `stage03.2_cache_incremental_attempt03` | `READY_FOR_STAGE03_3` |
+| 3.3 | exact-call deadline | `stage03.3_exact_deadline_attempt06` (72/72 axes) | `READY_FOR_STAGE03_4` |
+| 3.4 | candidate control + parallel | `stage03.4_control_parallel_attempt10` (smoke 72/72) + `attempt11` (formal 144/144) | `READY_FOR_STAGE04` |
+
+Key properties: screening may reject only provably-infeasible candidates;
+exact calls return atomically-marked `interrupted` states at lane deadlines;
+Stage 3.4 loads the reviewed Stage 3.3 wall-clock incumbent through an
+explicitly registered warm-start protocol and revalidates it through the full
+screening→ranking→cpu_batch pipeline.
+
+A separate paired pilot (`cpu_batch_pilot_attempt01`, 4 instances × 3 seeds)
+verified that the batched exact-charging backend preserves candidate work,
+route results, and objectives byte-consistently while saving 21.97% / 11.54% /
+24.40% end-to-end median time on the three 100-customer families. `cpu_batch`
+is the default backend from Stage 3.3 onward; `cpu_scalar` survives only
+behind frozen historical configurations.
+
+### Stage 4 adaptive weights and search control
+
+Stage 4 implements segment-based weight updates, six-category operator
+statistics, auto-estimated simulated-annealing temperature, reheating,
+stagnation restart, incumbent intensification, and differentiated rewards
+(vehicle reduction 8.0 > distance improvement 4.0 > accept-equal 1.0 >
+accept-worse 0.5 > rejected 0; global best + vehicle reduction 16.0).
+
+The accepted evidence is `stage04_adaptive_weights_attempt14` (smoke, 72/72
+axes) plus `stage04_adaptive_weights_attempt15` (formal, 144/144 axes), with
+independent review status `READY_FOR_STAGE05`. All six review gates passed:
+adaptive weights beat fixed weights on **7 (instance, seed) pairs** — more than
+the required 3 — with wins on all three seeds. Superseded attempts 01–13 and
+their progressively stricter reviewers (v1→v6) are retained.
+
+### Stage 5.1 best-known values
+
+Stage 5.1 compiles the published Schneider best-known values for all 92
+instances: small instances from Schneider, Stenger & Goeke (2014) Table 5 and
+100-customer instances from Keskin & Çatay (2016) Table 2.
+
+A five-dimension model-compatibility assessment (charging model, objective
+function, distance metric, time windows, vehicle parameters) concluded
+`model_compatible=False` — the published BKS use a two-term objective, while
+this repository optimizes a four-term lexicographic tuple. Therefore **no gaps
+are computed and no values are backfilled**; every instance is marked in
+`experiments/baselines/schneider_best_known.csv`.
+
+Accepted evidence: `stage05.1_best_known_attempt06`, independent review status
+`READY_FOR_STAGE05_2`.
+
+### Stage 5.2 performance governance and the layered benchmark (current)
+
+Stage 5.2 maintains a single current implementation validated through
+sequential gates A–G (see [`ROADMAP.md`](ROADMAP.md) and the Stage 5.2 workflow
+document):
+
+| Gate | Component | Status |
+|---|---|---|
+| A | `perf_baseline` (fixed-work instrumentation baseline) | passed |
+| B | `hot_path` (Python hot-path dedup) | passed |
+| C | `artifact_streaming` (storage v2, ≤ 36% persistence, ≤ 50% v1 RSS) | passed |
+| D | `job_parallel` (1/2/4-worker selection) | passed |
+| E | `native_kernels` (C++ pybind11 hot kernels, ≥ 15% median, zero fallback) | passed |
+| F | `accelerator_pilot` (conditional GPU decision — `GPU_NOT_JUSTIFIED` at occupancy < 32) | passed |
+| G | `benchmark` (pipeline pilot → formal) | **pilot passed; formal pending** |
+
+Current status: the G pipeline pilot `stage05.2_benchmark_attempt21` passed
+(36/36 axes, 18/18 campaign gates, persistence ratio 0.3360 < 0.36,
+`READY_FOR_STAGE052_FORMAL_BENCHMARK`). The formal benchmark — 2,040 solves
+over 92 instances × 10 seeds with a 30/60/300-second layered budget,
+229,200 declared solver-seconds — is **not yet complete**: attempts 22 (a
+runtime load-guard misjudgement) and 25 (a SQLite cross-thread spill error)
+both failed, were root-cause fixed with regression tests, and their failure
+evidence is retained. A retry from a new G pilot label is pending; gates A–F
+do not need to be rerun.
+
+The retention registry `experiments/registries/stage05.2_retention_registry.csv`
+tracks 173 archived runs (complete, partial, failed, `NOT_READY`, and
+superseded) with tree SHA-256 verification against the external archive
+volume.
+
 ---
 
 ## Repository structure
 
-This structure is **mandatory** — please keep it intact.
+The mandatory FURP template elements are preserved; the project has outgrown
+the initial skeleton as follows:
 
 ```
-/docs
- ├── 00_weekly.md         ← weekly-log template; keep unchanged
- ├── 01_weekly.md         ← Week 1 progress, challenges, and next steps
- └── meeting_notes/       ← key takeaways from all team meetings
-/src                      ← your code / experiments / materials
-FURP_Showcase.pdf         ← your poster / presentation PDF, in the repo root
+/docs                    ← weekly logs (01–06), stage protocols, method docs, meeting_notes/
+/src/evrptw/             ← core library (33 modules) + experiments/ (31 runner & review CLIs)
+/tests/                  ← 751 pytest tests
+/configs/                ← one formal TOML config per stage
+/data/schneider/         ← 92 Schneider benchmark instances (git-ignored research data)
+/experiments/            ← tracked summaries, registries, manifests, frozen baselines
+/results/                ← raw experiment evidence (git-ignored, ≈ 172 GB, 115 run directories)
+/cpp/                    ← C++20 pybind11 native kernel (screening, propagation, exact labelling)
+/poster/                 ← poster v2 engineering sources (story, design, scripts, figure assets)
+/tools/                  ← artifact preflight, runtime freeze, publication utilities
+/document/literature/    ← 6 verified VOR journal PDFs (git-ignored)
+FURP_Showcase.pdf        ← final showcase poster (v2), in the repo root
+poster.pptx              ← final poster source
+report.md                ← complete repository audit report
+ROADMAP.md               ← staged improvement roadmap (Stages 0–8)
+AGENTS.md                ← objective policy and per-stage acceptance rules
 ```
 
 - **`docs/00_weekly.md`** — the reusable weekly-log template.
@@ -340,7 +462,7 @@ Any **leave of absence** or **withdrawal** must be notified to us **by email** �
 - [x] Filled in the *Project Info* table above
 - [x] Created `docs/01_weekly.md` from the weekly template
 - [ ] Created my first file in `docs/meeting_notes/`
-- [ ] (By Showcase) Added `FURP_Showcase.pdf` to the repo root
+- [x] (By Showcase) Added `FURP_Showcase.pdf` to the repo root
 
 ---
 

@@ -29,7 +29,7 @@ The project has advanced to **Stage 5.2 G (benchmark)**: the Pilot passed (attem
 
 ### 1.1 Basic Facts
 
-- **Student**: Yiyang Guo (郭一阳), Mathematics and Applied Mathematics, individual project
+- **Student**: Yiyang Guo, Mathematics and Applied Mathematics, individual project
 - **Title**: Replication and Extension of the Electric Vehicle-Routing Problem with Time Windows and Recharging Stations (EVRP-TW)
 - **Replicated paper**: Schneider, Stenger & Goeke (2014), *Transportation Science* 48(4) 500–520
 - **Remote repository**: `github.com/0neblaze/FURP-2026-Yiyang-GUO-EVRP-TW` (master branch + the historical `week05-alns-bpc-rebuild` branch)
@@ -242,7 +242,7 @@ The trust design of this repository exceeds a typical undergraduate project and 
 - Weekly reports 01–06 plus per-week technical checkpoints (OR-Tools, baseline rebuild, experiment design, extended reading, ALNS/BPC methodology, second-edition rebuild report)
 - 17 stage-protocol documents (stage00 → stage052_change_log / performance_benchmark_workflow; **currently deleted in the worktree but fully preserved in git HEAD**, see §9.1)
 - `experiment_artifact_storage.md` (storage v2/v3 rules), `environment.md`, `reference_selection.md`, `references.bib`
-- `research/evrptw_publication_landscape_2026.md` (untracked): 2023–2026 publication-landscape and Q1/Q2 threshold survey (211-paper ALNS-VRP meta-analysis, exact-method frontier, software-paper standards)
+- `research/evrptw_publication_landscape_2026.md`: 2023–2026 publication-landscape and Q1/Q2 threshold survey (211-paper ALNS-VRP meta-analysis, exact-method frontier, software-paper standards); translated to English and tracked alongside this report
 
 ### 7.4 Showcase Materials
 
@@ -287,14 +287,14 @@ There is also harmless noise: SQLite temp files locked during teardown (WinError
 
 `git status` shows:
 
-- **17 tracked documents deleted in the worktree (not staged)**: `docs/stage00_baseline.md`, `stage01_lexicographic_objective.md`, `stage02_{route_reduction,route_quality,constraint_guided,constraint_guided_review}.md`, `stage03_{measurement,artifact_registry}.md`, `stage031/032/033/034_*.md`, `stage051_best_known.md`, `stage052_{change_log,performance_benchmark_workflow}.md`, `cpu_batch_pilot.md`, and the root `EVRP-TW主Baseline分阶段改进路线图.md`. All are fully preserved in git HEAD (several citations in this report were taken from HEAD). If the deletion was unintentional, run `git restore docs/`.
-- **Untracked new directories**: `.workbuddy/` (AI workspace) and `docs/research/` (publication-landscape survey); the poster v2 engineering is tracked under `poster/`.
+- **16 tracked documents deleted in the worktree (not staged)**: `docs/stage00_baseline.md`, `stage01_lexicographic_objective.md`, `stage02_{route_reduction,route_quality,constraint_guided,constraint_guided_review}.md`, `stage03_{measurement,artifact_registry}.md`, `stage031/032/033/034_*.md`, `stage051_best_known.md`, `stage052_{change_log,performance_benchmark_workflow}.md`, and `cpu_batch_pilot.md`. All are fully preserved in git HEAD (several citations in this report were taken from HEAD). If the deletion was unintentional, run `git restore docs/`. The 17th previously deleted file — the root Chinese-named staged-improvement roadmap — was translated to English and committed as `ROADMAP.md`.
+- **Untracked new directories**: `.workbuddy/` (AI workspace) only; the publication-landscape survey is tracked under `docs/research/`, and the poster v2 engineering is tracked under `poster/`.
 - In the README quick checklist, "share with the research group / public repository" and "first meeting_notes file" remain unchecked.
 
 ### 9.2 Project-Level Open Items
 
 1. **Stage 5.2 G Formal incomplete**: the Pilot (attempt21) passed, but the 2,040-run budget experiment has not produced results; the two engineering root causes behind attempt22/25 are fixed, and policy requires retrying from a new G Pilot label (A–F not rerun).
-2. **README not updated for Stages 3–5.2**: the README's stage narrative stops at Stage 2.3, while AGENTS.md and the docs/ protocol documents have evolved to Stage 5.2 — the externally visible narrative lags the actual progress.
+2. **README updated alongside this report**: the README's stage narrative previously stopped at Stage 2.3; it now covers Stages 3–5.2, the audited headline results, the actual repository structure, and the root deliverables (`FURP_Showcase.pdf`, `poster.pptx`, `report.md`, `ROADMAP.md`).
 3. **BKS incompatibility is an honest boundary**: the objective function and distance metric differ from the published BKS, so no gap comparison was made — publications must phrase improvements as "relative improvement within the self-consistent baseline".
 4. Poster and weekly-report figures were verified consistent (87→76/−12.6%, −5.1%, 36/36, −22.0% c101_21 median).
 
