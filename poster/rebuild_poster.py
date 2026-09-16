@@ -6,7 +6,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 
 TPL = r"D:\UserData\Downloads\Poster Template - 副本.pptx"
-OUT = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\poster\FURP_Showcase_Poster_v2.pptx"
+OUT = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\poster.pptx"
 ASSETS = r"D:\UserData\Documents\GitHub\FURP-2026-Yiyang-GUO-EVRP-TW\poster\assets"
 
 NOTT = RGBColor(0x10, 0x26, 0x3B)
