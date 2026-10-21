@@ -251,7 +251,7 @@ for sh in find_all(slide, "TextBox 1"):
     if sh.top and sh.top > Emu(int(80 * 360000)) and (sh.left or 0) > Emu(int(20 * 360000)):
         ft_right = sh
 if ft_right is not None:
-    set_runs(ft_right, ["Yiyang Guo  (Student ID: 20719106)", "Supervisor: Tianxing Cui"])
+    set_runs(ft_right, ["Yiyang Guo  (Student ID: 20719106)", "Supervisor: Tianxiang Cui"])
     ft_right.left = Cm(27.00)
     ft_right.width = Cm(31.76)   # right edge 58.76 -> text right edge ≈ 58.5 (matches QR)
     print("footer right set")

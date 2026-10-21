@@ -31,7 +31,7 @@ This is your project home for the FURP programme. **Fork this template**, rename
 | Project title | Replication and Extension of the Electric Vehicle-Routing Problem with Time Windows and Recharging Stations |
 | Project tag | EVRP-TW |
 | Track | Research |
-| Supervising faculty | Dr. Tianxing Cui |
+| Supervising faculty | Tianxiang Cui |
 | Project lead | Fuhua JIA (20618753), Department of Mechanical, Materials and Manufacturing Engineering |
 | Team or individual | Individual |
 | Cited paper being replicated | Michael Schneider, Andreas Stenger, and Dominik Goeke (2014), [The Electric Vehicle-Routing Problem with Time Windows and Recharging Stations](https://doi.org/10.1287/trsc.2013.0490), *Transportation Science*, 48(4), 500-520. DOI: `10.1287/trsc.2013.0490` |
